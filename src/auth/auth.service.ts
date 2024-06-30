@@ -1,7 +1,7 @@
 import { PrismaService } from 'src/prisma.service';
 import { User } from './auth.model';
 import { Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class AuthService {
@@ -25,7 +25,6 @@ export class AuthService {
 
   async hashPassword(password: string): Promise<string> {
     const saltRound = 10;
-
     return await bcrypt.hash(password, saltRound);
   }
 
@@ -40,11 +39,11 @@ export class AuthService {
 
   async updateUser(id: string, data: User): Promise<User> {
     return this.prisma.user.update({
-      where: {
-        id: String(id),
+      where: { id: String(id) },
+      data: {
+        ...data,
         password: await this.hashPassword(data.password),
       },
-      data: { ...data },
     });
   }
 
