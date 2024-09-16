@@ -3,6 +3,13 @@ import { Prisma } from '@prisma/client';
 
 export class User implements Prisma.UserUncheckedCreateInput {
   @ApiProperty({
+    example: 'ckp1z7z9d0000z3l7z9d0000z',
+    description: 'Unique identifier for the user',
+    uniqueItems: true,
+  })
+  id: string;
+
+  @ApiProperty({
     example: 'user@example.com',
     description: 'Email address of the user',
     uniqueItems: true,
@@ -21,11 +28,4 @@ export class User implements Prisma.UserUncheckedCreateInput {
     uniqueItems: true,
   })
   username: string;
-
-  @ApiProperty({
-    example: 'ckp1z7z9d0000z3l7z9d0000z',
-    description: 'Unique identifier for the user',
-    uniqueItems: true,
-  })
-  id: string;
 }
