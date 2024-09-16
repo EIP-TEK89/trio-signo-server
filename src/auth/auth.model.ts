@@ -21,4 +21,11 @@ export class User implements Prisma.UserUncheckedCreateInput {
     uniqueItems: true,
   })
   username: string;
+
+  @ApiProperty({
+    example: 'ckp1z7z9d0000z3l7z9d0000z',
+    description: 'Unique identifier for the user',
+    uniqueItems: true,
+  })
+  id: string;
 }
