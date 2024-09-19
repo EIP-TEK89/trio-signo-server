@@ -52,4 +52,23 @@ export class AuthService {
       where: { id: String(id) },
     });
   }
+
+  async validateOAuthLogin(user: User): Promise<User> {
+    const { email, username } = user;
+
+    let existingUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!existingUser) {
+      existingUser = await this.prisma.user.create({
+        data: {
+          email,
+          username,
+        },
+      });
+    }
+
+    return existingUser;
+  }
 }
