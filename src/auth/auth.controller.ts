@@ -106,7 +106,7 @@ export class AuthController {
   // Google OAuth2.0
   @Get('google')
   @UseGuards(AuthGuard('google'))
-  async googleAuth(@Req() req) {
+  async googleAuth() {
     // Auth process handled by Passport
   }
 
