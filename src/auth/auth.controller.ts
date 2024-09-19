@@ -6,6 +6,8 @@ import {
   Param,
   Post,
   Put,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -16,6 +18,7 @@ import {
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { User } from './auth.model';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('auth')
 @Controller('/api/auth')
@@ -98,5 +101,22 @@ export class AuthController {
   @ApiResponse({ status: 404, description: 'User not found.' })
   async deleteUser(@Param('id') id: string): Promise<User> {
     return this.authService.deleteUser(id);
+  }
+
+  // Google OAuth2.0
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth(@Req() req) {
+    // Auth process handled by Passport
+  }
+
+  @Get('google/redirect')
+  @UseGuards(AuthGuard('google'))
+  googleAuthRedirect(@Req() req) {
+    // Google redirect after successful authentication
+    return {
+      message: 'Authentication successful',
+      user: req.user,
+    };
   }
 }
