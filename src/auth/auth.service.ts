@@ -1,4 +1,4 @@
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from 'prisma/prisma.service';
 import { User } from './auth.model';
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
