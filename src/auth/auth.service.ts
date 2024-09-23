@@ -1,4 +1,4 @@
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from 'prisma/prisma.service';
 import { User } from './auth.model';
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
@@ -51,5 +51,28 @@ export class AuthService {
     return this.prisma.user.delete({
       where: { id: String(id) },
     });
+  }
+
+  async validateOAuthLogin(user: User): Promise<User> {
+    const { email, username, accessToken, refreshToken } = user;
+
+    let existingUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!existingUser) {
+      existingUser = await this.prisma.user.create({
+        data: {
+          email,
+          username,
+          accessToken,
+          refreshToken,
+        },
+      });
+    }
+
+    console.log('existingUser', existingUser);
+
+    return existingUser;
   }
 }
