@@ -15,6 +15,7 @@ import {
   ApiResponse,
   ApiParam,
   ApiBody,
+  getSchemaPath,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { User } from './auth.model';
@@ -30,6 +31,28 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'List of users returned successfully.',
+    schema: {
+      type: 'array',
+      items: {
+        $ref: getSchemaPath(User),
+      },
+      example: [
+        {
+          id: 'ckp1z7z9d0000z3l7z9d0000z',
+          email: 'user1@example.com',
+          username: 'user1',
+        },
+        {
+          id: 'ckp1z7z9d0000z3l7z9d0000z',
+          email: 'user2@example.com',
+          username: 'user2',
+        },
+      ],
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error.',
   })
   async getAllUsers(): Promise<User[]> {
     return this.authService.getAllUsers();
@@ -41,8 +64,22 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'User found and returned successfully.',
+    schema: {
+      example: {
+        id: 'ckp1z7z9d0000z3l7z9d0000z',
+        email: 'user@example.com',
+        username: 'username123',
+      },
+    },
   })
-  @ApiResponse({ status: 404, description: 'User not found.' })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found.',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error.',
+  })
   async getUserById(@Param('id') id: string): Promise<User | null> {
     return this.authService.getUserById(id);
   }
@@ -53,8 +90,22 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'User found and returned successfully.',
+    schema: {
+      example: {
+        id: 'ckp1z7z9d0000z3l7z9d0000z',
+        email: 'user@example.com',
+        username: 'username123',
+      },
+    },
   })
-  @ApiResponse({ status: 404, description: 'User not found.' })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found.',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error.',
+  })
   async getUserByEmail(@Param('email') email: string): Promise<User | null> {
     return this.authService.getUserByEmail(email);
   }
@@ -68,8 +119,22 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'User found and returned successfully.',
+    schema: {
+      example: {
+        id: 'ckp1z7z9d0000z3l7z9d0000z',
+        email: 'user@example.com',
+        username: 'username123',
+      },
+    },
   })
-  @ApiResponse({ status: 404, description: 'User not found.' })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found.',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error.',
+  })
   async getUserByUsername(
     @Param('username') username: string,
   ): Promise<User | null> {
@@ -79,7 +144,25 @@ export class AuthController {
   @Post('user')
   @ApiOperation({ summary: 'Create a new user' })
   @ApiBody({ description: 'Data for the new user', type: User })
-  @ApiResponse({ status: 201, description: 'User created successfully.' })
+  @ApiResponse({
+    status: 201,
+    description: 'User created successfully.',
+    schema: {
+      example: {
+        id: 'ckp1z7z9d0000z3l7z9d0000z',
+        email: 'user@example.com',
+        username: 'username123',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request. Invalid data.',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error.',
+  })
   async createUser(@Body() data: User): Promise<User> {
     return this.authService.createUser(data);
   }
@@ -88,8 +171,29 @@ export class AuthController {
   @ApiOperation({ summary: 'Update an existing user' })
   @ApiParam({ name: 'id', description: 'ID of the user to update' })
   @ApiBody({ description: 'Updated data for the user', type: User })
-  @ApiResponse({ status: 200, description: 'User updated successfully.' })
-  @ApiResponse({ status: 404, description: 'User not found.' })
+  @ApiResponse({
+    status: 200,
+    description: 'User updated successfully.',
+    schema: {
+      example: {
+        id: 'ckp1z7z9d0000z3l7z9d0000z',
+        email: 'user@example.com',
+        username: 'updatedUsername123',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request. Invalid data.',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error.',
+  })
   async updateUser(@Param('id') id: string, @Body() data: User): Promise<User> {
     return this.authService.updateUser(id, data);
   }
@@ -97,8 +201,25 @@ export class AuthController {
   @Delete('user/:id')
   @ApiOperation({ summary: 'Delete a user' })
   @ApiParam({ name: 'id', description: 'ID of the user to delete' })
-  @ApiResponse({ status: 200, description: 'User deleted successfully.' })
-  @ApiResponse({ status: 404, description: 'User not found.' })
+  @ApiResponse({
+    status: 200,
+    description: 'User deleted successfully.',
+    schema: {
+      example: {
+        id: 'ckp1z7z9d0000z3l7z9d0000z',
+        email: 'user@example.com',
+        username: 'deletedUsername123',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found.',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error.',
+  })
   async deleteUser(@Param('id') id: string): Promise<User> {
     return this.authService.deleteUser(id);
   }
@@ -106,12 +227,47 @@ export class AuthController {
   // Google OAuth2.0
   @Get('google')
   @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: 'Authenticate with Google' })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to Google OAuth2 login page.',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error during authentication process.',
+  })
   async googleAuth() {
     // Auth process handled by Passport
   }
 
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: 'Google authentication redirect' })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Authentication successful. Returns the user details and tokens.',
+    schema: {
+      example: {
+        message: 'Authentication successful',
+        user: {
+          id: 'ckp1z7z9d0000z3l7z9d0000z',
+          email: 'user@example.com',
+          username: 'username123',
+          accessToken: 'someAccessToken',
+          refreshToken: 'someRefreshToken',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Failed to authenticate with Google.',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error during authentication callback.',
+  })
   googleAuthRedirect(@Req() req) {
     // Google redirect after successful authentication
     return {
