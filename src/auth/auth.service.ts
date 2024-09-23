@@ -54,7 +54,7 @@ export class AuthService {
   }
 
   async validateOAuthLogin(user: User): Promise<User> {
-    const { email, username } = user;
+    const { email, username, accessToken, refreshToken } = user;
 
     let existingUser = await this.prisma.user.findUnique({
       where: { email },
@@ -65,9 +65,13 @@ export class AuthService {
         data: {
           email,
           username,
+          accessToken,
+          refreshToken,
         },
       });
     }
+
+    console.log('existingUser', existingUser);
 
     return existingUser;
   }

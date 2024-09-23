@@ -7,7 +7,7 @@ export class User implements Prisma.UserUncheckedCreateInput {
     description: 'Unique identifier for the user',
     uniqueItems: true,
   })
-  id: string;
+  id?: string;
 
   @ApiProperty({
     example: 'user@example.com',
@@ -20,7 +20,7 @@ export class User implements Prisma.UserUncheckedCreateInput {
     example: 'strong_password_123',
     description: 'Hashed password for the user',
   })
-  password: string;
+  password?: string;
 
   @ApiProperty({
     example: 'username123',
@@ -28,4 +28,16 @@ export class User implements Prisma.UserUncheckedCreateInput {
     uniqueItems: true,
   })
   username: string;
+
+  @ApiProperty({
+    example: 'google',
+    description: 'OAuth provider used to sign in',
+  })
+  accessToken?: string;
+
+  @ApiProperty({
+    example: 'google',
+    description: 'OAuth provider used to sign in',
+  })
+  refreshToken?: string;
 }
