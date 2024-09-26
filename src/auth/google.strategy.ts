@@ -37,7 +37,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     };
 
     const savedUser: User = await this.authService.validateOAuthLogin(user);
+    const token = 'exemple_token';
 
-    done(null, savedUser);
+    done(null, { user: savedUser, token });
   }
 }

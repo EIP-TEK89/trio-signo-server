@@ -7,6 +7,7 @@ import {
   Post,
   Put,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -268,11 +269,11 @@ export class AuthController {
     status: 500,
     description: 'Internal server error during authentication callback.',
   })
-  googleAuthRedirect(@Req() req) {
+  googleAuthRedirect(@Req() req, @Res() res) {
+    const { token } = req.user;
     // Google redirect after successful authentication
-    return {
-      message: 'Authentication successful',
-      user: req.user,
-    };
+
+    // Redirect to frontend with token
+    res.redirect(`http://localhost:4000/login?token=${token}`);
   }
 }
