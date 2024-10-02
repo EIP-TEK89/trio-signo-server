@@ -171,7 +171,7 @@ export class AuthController {
     return this.authService.signUp(signUpDto);
   }
 
-  @Post('login')
+  @Post('log-in')
   @ApiOperation({ summary: 'Log in with an email and a password' })
   @ApiResponse({
     status: 200,
