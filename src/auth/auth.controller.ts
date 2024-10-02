@@ -20,6 +20,7 @@ import {
 import { AuthService } from './auth.service';
 import { User } from './auth.model';
 import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @ApiTags('auth')
 @Controller('/api/auth')
@@ -27,6 +28,7 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Get('users')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Retrieve all users' })
   @ApiResponse({
     status: 200,
@@ -59,6 +61,7 @@ export class AuthController {
   }
 
   @Get('users/:id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Retrieve a user by ID' })
   @ApiParam({ name: 'id', description: 'ID of the user to retrieve' })
   @ApiResponse({
@@ -85,6 +88,7 @@ export class AuthController {
   }
 
   @Get('users/email/:email')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Retrieve a user by email' })
   @ApiParam({ name: 'email', description: 'Email of the user to retrieve' })
   @ApiResponse({
@@ -111,6 +115,7 @@ export class AuthController {
   }
 
   @Get('users/username/:username')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Retrieve a user by username' })
   @ApiParam({
     name: 'username',
@@ -168,6 +173,7 @@ export class AuthController {
   }
 
   @Put('user/:id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Update an existing user' })
   @ApiParam({ name: 'id', description: 'ID of the user to update' })
   @ApiBody({ description: 'Updated data for the user', type: User })
@@ -199,6 +205,7 @@ export class AuthController {
   }
 
   @Delete('user/:id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Delete a user' })
   @ApiParam({ name: 'id', description: 'ID of the user to delete' })
   @ApiResponse({
