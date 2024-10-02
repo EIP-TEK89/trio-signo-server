@@ -16,11 +16,13 @@ import {
   ApiParam,
   ApiBody,
   getSchemaPath,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { User } from './auth.model';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { LoginDto } from './dto/login.dto';
 
 @ApiTags('auth')
 @Controller('/api/auth')
@@ -29,6 +31,7 @@ export class AuthController {
 
   @Get('users')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Retrieve all users' })
   @ApiResponse({
     status: 200,
@@ -62,6 +65,7 @@ export class AuthController {
 
   @Get('users/:id')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Retrieve a user by ID' })
   @ApiParam({ name: 'id', description: 'ID of the user to retrieve' })
   @ApiResponse({
@@ -89,6 +93,7 @@ export class AuthController {
 
   @Get('users/email/:email')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Retrieve a user by email' })
   @ApiParam({ name: 'email', description: 'Email of the user to retrieve' })
   @ApiResponse({
@@ -116,6 +121,7 @@ export class AuthController {
 
   @Get('users/username/:username')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Retrieve a user by username' })
   @ApiParam({
     name: 'username',
@@ -172,8 +178,41 @@ export class AuthController {
     return this.authService.createUser(data);
   }
 
+  @Post('login')
+  @ApiOperation({ summary: 'Connexion avec email et mot de passe' })
+  @ApiResponse({
+    status: 200,
+    description: 'Connexion réussie',
+    schema: {
+      example: {
+        access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Identifiants invalides',
+    schema: {
+      example: {
+        message: 'Invalid credentials',
+      },
+    },
+  })
+  @ApiBody({ type: LoginDto })
+  async login(@Body() loginDto: { email: string; password: string }) {
+    const user = await this.authService.validateUser(
+      loginDto.email,
+      loginDto.password,
+    );
+    if (!user) {
+      return { message: 'Invalid credentials' };
+    }
+    return this.authService.login(user);
+  }
+
   @Put('user/:id')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update an existing user' })
   @ApiParam({ name: 'id', description: 'ID of the user to update' })
   @ApiBody({ description: 'Updated data for the user', type: User })
@@ -206,6 +245,7 @@ export class AuthController {
 
   @Delete('user/:id')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Delete a user' })
   @ApiParam({ name: 'id', description: 'ID of the user to delete' })
   @ApiResponse({
