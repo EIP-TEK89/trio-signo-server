@@ -23,6 +23,7 @@ import { User } from './auth.model';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { LoginDto } from './dto/login.dto';
+import { SignUpDto } from './dto/sign-up.dto';
 
 @ApiTags('auth')
 @Controller('/api/auth')
@@ -152,30 +153,22 @@ export class AuthController {
     return this.authService.getUserByUsername(username);
   }
 
-  @Post('user')
-  @ApiOperation({ summary: 'Create a new user' })
-  @ApiBody({ description: 'Data for the new user', type: User })
+  @Post('sign-up')
+  @ApiOperation({ summary: 'Create an account' })
   @ApiResponse({
     status: 201,
-    description: 'User created successfully.',
+    description: 'User created successfully',
     schema: {
-      example: {
-        id: 'ckp1z7z9d0000z3l7z9d0000z',
-        email: 'user@example.com',
-        username: 'username123',
-      },
+      example: { access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
     },
   })
   @ApiResponse({
     status: 400,
-    description: 'Bad request. Invalid data.',
+    description: 'Error creating user',
   })
-  @ApiResponse({
-    status: 500,
-    description: 'Internal server error.',
-  })
-  async createUser(@Body() data: User): Promise<User> {
-    return this.authService.createUser(data);
+  @ApiBody({ type: SignUpDto })
+  async signUp(@Body() signUpDto: SignUpDto) {
+    return this.authService.signUp(signUpDto);
   }
 
   @Post('login')

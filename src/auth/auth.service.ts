@@ -27,6 +27,23 @@ export class AuthService {
     };
   }
 
+  async signUp(data: { email: string; username: string; password: string }) {
+    const hashedPassword = await this.hashPassword(data.password);
+
+    const user = await this.prisma.user.create({
+      data: {
+        email: data.email,
+        username: data.username,
+        password: hashedPassword,
+      },
+    });
+
+    const payload = { username: user.username, sub: user.id };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
+  }
+
   async getAllUsers(): Promise<User[]> {
     return this.prisma.user.findMany();
   }
