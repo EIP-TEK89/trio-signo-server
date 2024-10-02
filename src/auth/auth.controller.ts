@@ -172,10 +172,10 @@ export class AuthController {
   }
 
   @Post('login')
-  @ApiOperation({ summary: 'Connexion avec email et mot de passe' })
+  @ApiOperation({ summary: 'Log in with an email and a password' })
   @ApiResponse({
     status: 200,
-    description: 'Connexion réussie',
+    description: 'User logged in successfully',
     schema: {
       example: {
         access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
@@ -184,7 +184,7 @@ export class AuthController {
   })
   @ApiResponse({
     status: 401,
-    description: 'Identifiants invalides',
+    description: 'Invalid credentials',
     schema: {
       example: {
         message: 'Invalid credentials',
