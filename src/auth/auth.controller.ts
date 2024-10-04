@@ -7,6 +7,7 @@ import {
   Post,
   Put,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -20,6 +21,7 @@ import {
 import { AuthService } from './auth.service';
 import { User } from './auth.model';
 import { AuthGuard } from '@nestjs/passport';
+import { Response } from 'express';
 
 @ApiTags('auth')
 @Controller('/api/auth')
@@ -244,18 +246,14 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Google authentication redirect' })
   @ApiResponse({
-    status: 200,
-    description:
-      'Authentication successful. Returns the user details and tokens.',
-    schema: {
-      example: {
-        message: 'Authentication successful',
-        user: {
-          id: 'ckp1z7z9d0000z3l7z9d0000z',
-          email: 'user@example.com',
-          username: 'username123',
-          accessToken: 'someAccessToken',
-          refreshToken: 'someRefreshToken',
+    status: 302,
+    description: 'Redirection to frontend with JWT token in URL.',
+    headers: {
+      Location: {
+        description: 'URL of the redirection with the token',
+        schema: {
+          type: 'string',
+          example: 'http://localhost:4000/?token=someJwtToken',
         },
       },
     },
@@ -268,11 +266,11 @@ export class AuthController {
     status: 500,
     description: 'Internal server error during authentication callback.',
   })
-  googleAuthRedirect(@Req() req) {
+  googleAuthRedirect(@Req() req, @Res() res: Response) {
+    const { token } = req.user;
     // Google redirect after successful authentication
-    return {
-      message: 'Authentication successful',
-      user: req.user,
-    };
+
+    // Redirect to frontend with token
+    res.redirect(`http://localhost:4000/login?token=${token}`);
   }
 }

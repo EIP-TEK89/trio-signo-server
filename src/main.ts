@@ -12,7 +12,6 @@ async function bootstrap() {
     .setTitle('API Documentation')
     .setDescription('TrioSigno API Documentation')
     .setVersion('1.0')
-    .addTag('triosigno')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
