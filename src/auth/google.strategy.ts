@@ -4,11 +4,13 @@ import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { User } from './auth.model';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(
     private configService: ConfigService,
+    private jwtService: JwtService,
     private authService: AuthService,
   ) {
     super({
@@ -37,7 +39,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     };
 
     const savedUser: User = await this.authService.validateOAuthLogin(user);
-    const token = 'exemple_token'; // TODO: implement JWT token generation
+
+    const payload = { username: savedUser.username, sub: savedUser.id };
+    const token = this.jwtService.sign(payload);
 
     done(null, { user: savedUser, token });
   }
