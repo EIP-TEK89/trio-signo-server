@@ -7,7 +7,6 @@ import {
   Post,
   Put,
   Req,
-  Res,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -17,10 +16,14 @@ import {
   ApiParam,
   ApiBody,
   getSchemaPath,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { User } from './auth.model';
 import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { LoginDto } from './dto/login.dto';
+import { SignUpDto } from './dto/sign-up.dto';
 import { Response } from 'express';
 
 @ApiTags('auth')
@@ -29,6 +32,8 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Get('users')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Retrieve all users' })
   @ApiResponse({
     status: 200,
@@ -61,6 +66,8 @@ export class AuthController {
   }
 
   @Get('users/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Retrieve a user by ID' })
   @ApiParam({ name: 'id', description: 'ID of the user to retrieve' })
   @ApiResponse({
@@ -87,6 +94,8 @@ export class AuthController {
   }
 
   @Get('users/email/:email')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Retrieve a user by email' })
   @ApiParam({ name: 'email', description: 'Email of the user to retrieve' })
   @ApiResponse({
@@ -113,6 +122,8 @@ export class AuthController {
   }
 
   @Get('users/username/:username')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Retrieve a user by username' })
   @ApiParam({
     name: 'username',
@@ -143,33 +154,59 @@ export class AuthController {
     return this.authService.getUserByUsername(username);
   }
 
-  @Post('user')
-  @ApiOperation({ summary: 'Create a new user' })
-  @ApiBody({ description: 'Data for the new user', type: User })
+  @Post('sign-up')
+  @ApiOperation({ summary: 'Create an account' })
   @ApiResponse({
     status: 201,
-    description: 'User created successfully.',
+    description: 'User created successfully',
     schema: {
-      example: {
-        id: 'ckp1z7z9d0000z3l7z9d0000z',
-        email: 'user@example.com',
-        username: 'username123',
-      },
+      example: { access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
     },
   })
   @ApiResponse({
     status: 400,
-    description: 'Bad request. Invalid data.',
+    description: 'Error creating user',
+  })
+  @ApiBody({ type: SignUpDto })
+  async signUp(@Body() signUpDto: SignUpDto) {
+    return this.authService.signUp(signUpDto);
+  }
+
+  @Post('log-in')
+  @ApiOperation({ summary: 'Log in with an email and a password' })
+  @ApiResponse({
+    status: 200,
+    description: 'User logged in successfully',
+    schema: {
+      example: {
+        access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+      },
+    },
   })
   @ApiResponse({
-    status: 500,
-    description: 'Internal server error.',
+    status: 401,
+    description: 'Invalid credentials',
+    schema: {
+      example: {
+        message: 'Invalid credentials',
+      },
+    },
   })
-  async createUser(@Body() data: User): Promise<User> {
-    return this.authService.createUser(data);
+  @ApiBody({ type: LoginDto })
+  async login(@Body() loginDto: { email: string; password: string }) {
+    const user = await this.authService.validateUser(
+      loginDto.email,
+      loginDto.password,
+    );
+    if (!user) {
+      return { message: 'Invalid credentials' };
+    }
+    return this.authService.login(user);
   }
 
   @Put('user/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update an existing user' })
   @ApiParam({ name: 'id', description: 'ID of the user to update' })
   @ApiBody({ description: 'Updated data for the user', type: User })
@@ -201,6 +238,8 @@ export class AuthController {
   }
 
   @Delete('user/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Delete a user' })
   @ApiParam({ name: 'id', description: 'ID of the user to delete' })
   @ApiResponse({
@@ -268,9 +307,8 @@ export class AuthController {
   })
   googleAuthRedirect(@Req() req, @Res() res: Response) {
     const { token } = req.user;
-    // Google redirect after successful authentication
 
-    // Redirect to frontend with token
+    // Google redirect after successful authentication
     res.redirect(`http://localhost:4000/login?token=${token}`);
   }
 }
