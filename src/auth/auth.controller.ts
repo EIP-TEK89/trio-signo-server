@@ -308,9 +308,8 @@ export class AuthController {
   })
   googleAuthRedirect(@Req() req, @Res() res: Response) {
     const { token } = req.user;
-    // Google redirect after successful authentication
 
-    // Redirect to frontend with token
+    // Google redirect after successful authentication
     res.redirect(`http://localhost:4000/login?token=${token}`);
   }
 }
