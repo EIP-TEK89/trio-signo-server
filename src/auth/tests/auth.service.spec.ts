@@ -76,5 +76,26 @@ describe('AuthService', () => {
     });
   });
 
+  describe('signUp', () => {
+    it('should return access_token on successful signup', async () => {
+      const signUpInput = {
+        email: 'test@test.com',
+        username: 'testuser',
+        password: 'password123',
+      };
+
+      const mockCreatedUser = {
+        ...mockUser,
+        password: 'hashedPassword',
+      };
+
+      jest.spyOn(prisma.user, 'create').mockResolvedValue(mockCreatedUser);
+
+      const result = await service.signUp(signUpInput);
+
+      expect(result).toEqual({ access_token: 'mockedJwtToken' });
+    });
+  });
+
   // Additional tests for signUp, updateUser, etc.
 });
