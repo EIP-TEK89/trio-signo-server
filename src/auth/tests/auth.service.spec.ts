@@ -3,13 +3,21 @@ import { AuthService } from '../auth.service';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { User } from './authtests.model';
 
 jest.mock('../functions/hashPassword.function', () => ({
   hashPassword: jest.fn(),
 }));
 
 import { hashPassword } from '../functions/hashPassword.function';
+
+class User {
+  id: string;
+  email: string;
+  username: string;
+  password: string;
+  accessToken: string;
+  refreshToken: string;
+}
 
 describe('AuthService', () => {
   let service: AuthService;
