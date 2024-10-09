@@ -26,6 +26,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Set JWT Secret
+        run: echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
+
       - name: Run Tests
         run: npm run test
 
@@ -44,6 +47,9 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+
+      - name: Set JWT Secret
+        run: echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
 
       - name: Run Tests
         run: npm run test:e2e
