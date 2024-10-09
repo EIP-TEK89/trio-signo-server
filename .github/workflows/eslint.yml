@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - 17-ci-eslint # just for testing
   pull_request:
     branches:
       - main
