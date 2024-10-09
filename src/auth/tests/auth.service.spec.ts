@@ -5,6 +5,12 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { User } from './authtests.model';
 
+jest.mock('../functions/hashPassword.function', () => ({
+  hashPassword: jest.fn(),
+}));
+
+import { hashPassword } from '../functions/hashPassword.function';
+
 describe('AuthService', () => {
   let service: AuthService;
   let prisma: PrismaService;
@@ -33,6 +39,8 @@ describe('AuthService', () => {
               findUnique: jest.fn(),
               create: jest.fn(),
               findMany: jest.fn(),
+              update: jest.fn(),
+              delete: jest.fn(),
             },
           },
         },
@@ -194,6 +202,143 @@ describe('AuthService', () => {
       expect(result).toBeNull();
       expect(prisma.user.findUnique).toHaveBeenCalledWith({
         where: { username: 'notfounduser' },
+      });
+    });
+  });
+
+  describe('updateUser', () => {
+    it('should update the user and hash the password', async () => {
+      const mockUpdatedUser: User & { createdAt: Date; updatedAt: Date } = {
+        id: '1',
+        email: 'updated@test.com',
+        password: 'hashedUpdatedPassword',
+        username: 'updateduser',
+        accessToken: 'updatedAccessToken',
+        refreshToken: 'updatedRefreshToken',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const updatedData = {
+        email: 'updated@test.com',
+        password: 'updatedPassword',
+        username: 'updateduser',
+        accessToken: 'updatedAccessToken',
+        refreshToken: 'updatedRefreshToken',
+      };
+
+      (hashPassword as jest.Mock).mockResolvedValue('hashedUpdatedPassword');
+
+      jest.spyOn(prisma.user, 'update').mockResolvedValue(mockUpdatedUser);
+
+      const result = await service.updateUser('1', updatedData as User);
+
+      expect(result).toEqual(mockUpdatedUser);
+
+      expect(hashPassword).toHaveBeenCalledWith('updatedPassword');
+
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: '1' },
+        data: {
+          ...updatedData,
+          password: 'hashedUpdatedPassword',
+        },
+      });
+    });
+  });
+
+  describe('deleteUser', () => {
+    it('should delete a user and return the deleted user data', async () => {
+      const mockDeletedUser: User & { createdAt: Date; updatedAt: Date } = {
+        id: '1',
+        email: 'deleted@test.com',
+        password: 'hashedPassword',
+        username: 'deleteduser',
+        accessToken: 'deletedAccessToken',
+        refreshToken: 'deletedRefreshToken',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      jest.spyOn(prisma.user, 'delete').mockResolvedValue(mockDeletedUser);
+
+      const result = await service.deleteUser('1');
+
+      expect(result).toEqual(mockDeletedUser);
+
+      expect(prisma.user.delete).toHaveBeenCalledWith({
+        where: { id: '1' },
+      });
+    });
+
+    it('should handle cases where the user is not found', async () => {
+      jest
+        .spyOn(prisma.user, 'delete')
+        .mockRejectedValue(new Error('User not found'));
+
+      await expect(service.deleteUser('nonexistent-id')).rejects.toThrow(
+        'User not found',
+      );
+
+      expect(prisma.user.delete).toHaveBeenCalledWith({
+        where: { id: 'nonexistent-id' },
+      });
+    });
+  });
+
+  describe('validateOAuthLogin', () => {
+    const mockUser: User & { createdAt: Date; updatedAt: Date } = {
+      id: '1',
+      email: 'oauthuser@test.com',
+      password: 'hashedPassword',
+      username: 'oauthuser',
+      accessToken: 'oauthAccessToken',
+      refreshToken: 'oauthRefreshToken',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    const newUser = {
+      email: 'oauthuser@test.com',
+      username: 'oauthuser',
+      accessToken: 'oauthAccessToken',
+      refreshToken: 'oauthRefreshToken',
+    };
+
+    it('should return the existing user if found', async () => {
+      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
+
+      const result = await service.validateOAuthLogin(newUser as User);
+
+      expect(result).toEqual(mockUser);
+
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { email: 'oauthuser@test.com' },
+      });
+
+      expect(prisma.user.create).not.toHaveBeenCalled();
+    });
+
+    it('should create and return a new user if not found', async () => {
+      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
+
+      jest.spyOn(prisma.user, 'create').mockResolvedValue(mockUser);
+
+      const result = await service.validateOAuthLogin(newUser as User);
+
+      expect(result).toEqual(mockUser);
+
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { email: 'oauthuser@test.com' },
+      });
+
+      expect(prisma.user.create).toHaveBeenCalledWith({
+        data: {
+          email: 'oauthuser@test.com',
+          username: 'oauthuser',
+          accessToken: 'oauthAccessToken',
+          refreshToken: 'oauthRefreshToken',
+        },
       });
     });
   });
