@@ -9,41 +9,41 @@ on:
     branches:
       - main
 
-  jobs:
-    unit-tests:
-      name: Run Unit Tests
-      runs-on: ubuntu-latest
+jobs:
+  unit-tests:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
 
-      steps:
-        - name: Checkout repository
-          uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-        - name: Setup Node.js
-          uses: actions/setup-node@v3
-          with:
-            node-version: '16'
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
 
-        - name: Install dependencies
-          run: npm install
+      - name: Install dependencies
+        run: npm install
 
-        - name: Run Tests
-          run: npm run test
+      - name: Run Tests
+        run: npm run test
 
-    e2e-tests:
-      name: Run End-to-End Tests
-      runs-on: ubuntu-latest
+  e2e-tests:
+    name: Run End-to-End Tests
+    runs-on: ubuntu-latest
 
-      steps:
-        - name: Checkout repository
-          uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-        - name: Setup Node.js
-          uses: actions/setup-node@v3
-          with:
-            node-version: '16'
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
 
-        - name: Install dependencies
-          run: npm install
+      - name: Install dependencies
+        run: npm install
 
-        - name: Run Tests
-          run: npm run test:e2e
+      - name: Run Tests
+        run: npm run test:e2e
