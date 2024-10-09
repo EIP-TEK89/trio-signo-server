@@ -131,4 +131,22 @@ describe('AuthController', () => {
       expect(service.deleteUser).toHaveBeenCalledWith('1');
     });
   });
+
+  describe('googleAuthRedirect', () => {
+    it('should redirect to Google OAuth with the token', async () => {
+      const req = {
+        user: { token: 'mockedJwtToken' },
+      } as any;
+
+      const res = {
+        redirect: jest.fn(),
+      } as any;
+
+      controller.googleAuthRedirect(req, res);
+
+      expect(res.redirect).toHaveBeenCalledWith(
+        'http://localhost:4000/login?token=mockedJwtToken',
+      );
+    });
+  });
 });
