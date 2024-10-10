@@ -23,7 +23,7 @@ import { AuthService } from './auth.service';
 import { User } from './auth.model';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { LoginDto } from './dto/login.dto';
+import { LoginDto } from './dto/log-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { Response } from 'express';
 
