@@ -31,6 +31,14 @@ export class AuthService {
   async signUp(data: { email: string; username: string; password: string }) {
     const hashedPassword = await hashPassword(data.password);
 
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: data.email },
+    });
+
+    if (existingUser) {
+      throw new Error('User already exists');
+    }
+
     const user = await this.prisma.user.create({
       data: {
         email: data.email,
@@ -38,6 +46,14 @@ export class AuthService {
         password: hashedPassword,
       },
     });
+
+    // const user = await this.prisma.user.create({
+    //   data: {
+    //     email: data.email,
+    //     username: data.username,
+    //     password: hashedPassword,
+    //   },
+    // });
 
     const payload = { username: user.username, sub: user.id };
     return {

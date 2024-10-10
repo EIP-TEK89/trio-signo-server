@@ -169,8 +169,13 @@ export class AuthController {
     description: 'Error creating user',
   })
   @ApiBody({ type: SignUpDto })
-  async signUp(@Body() signUpDto: SignUpDto) {
-    return this.authService.signUp(signUpDto);
+  async signUp(@Body() signUpDto: SignUpDto, @Res() res: Response) {
+    try {
+      const user = await this.authService.signUp(signUpDto);
+      return res.status(201).send(user);
+    } catch (error) {
+      return res.status(400).send({ message: error.message });
+    }
   }
 
   @Post('log-in')
