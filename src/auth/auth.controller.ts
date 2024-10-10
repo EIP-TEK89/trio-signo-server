@@ -199,15 +199,16 @@ export class AuthController {
     },
   })
   @ApiBody({ type: LoginDto })
-  async login(@Body() loginDto: { email: string; password: string }) {
-    const user = await this.authService.validateUser(
-      loginDto.email,
-      loginDto.password,
-    );
-    if (!user) {
-      return { message: 'Invalid credentials' };
+  async login(@Body() loginDto: { email: string; password: string }, @Res() res: Response) {
+    try {
+      const user = await this.authService.validateUser(
+        loginDto.email,
+        loginDto.password,
+      );
+      return res.status(200).send(user);
+    } catch (error) {
+      return res.status(401).send({ message: error.message });
     }
-    return this.authService.login(user);
   }
 
   @Put('user/:id')

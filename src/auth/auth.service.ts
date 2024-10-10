@@ -18,7 +18,7 @@ export class AuthService {
     if (user && (await bcrypt.compare(pass, user.password))) {
       return user;
     }
-    return null;
+    throw new Error('Invalid email or password');
   }
 
   async login(user: User) {
@@ -46,14 +46,6 @@ export class AuthService {
         password: hashedPassword,
       },
     });
-
-    // const user = await this.prisma.user.create({
-    //   data: {
-    //     email: data.email,
-    //     username: data.username,
-    //     password: hashedPassword,
-    //   },
-    // });
 
     const payload = { username: user.username, sub: user.id };
     return {
