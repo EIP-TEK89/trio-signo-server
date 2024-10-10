@@ -90,8 +90,13 @@ export class AuthController {
     status: 500,
     description: 'Internal server error.',
   })
-  async getUserById(@Param('id') id: string): Promise<User | null> {
-    return this.authService.getUserById(id);
+  async getUserById(@Param('id') id: string, @Res() res: Response) {
+    try {
+      const user = await this.authService.getUserById(id);
+      return res.status(200).send(user);
+    } catch (error) {
+      return res.status(404).send({ message: error.message });
+    }
   }
 
   @Get('users/email/:email')
@@ -118,8 +123,13 @@ export class AuthController {
     status: 500,
     description: 'Internal server error.',
   })
-  async getUserByEmail(@Param('email') email: string): Promise<User | null> {
-    return this.authService.getUserByEmail(email);
+  async getUserByEmail(@Param('email') email: string, @Res() res: Response) {
+    try {
+      const user = await this.authService.getUserByEmail(email);
+      return res.status(200).send(user);
+    } catch (error) {
+      return res.status(404).send({ message: error.message });
+    }
   }
 
   @Get('users/username/:username')
@@ -151,8 +161,14 @@ export class AuthController {
   })
   async getUserByUsername(
     @Param('username') username: string,
-  ): Promise<User | null> {
-    return this.authService.getUserByUsername(username);
+    @Res() res: Response,
+  ) {
+    try {
+      const user = await this.authService.getUserByUsername(username);
+      return res.status(200).send(user);
+    } catch (error) {
+      return res.status(404).send({ message: error.message });
+    }
   }
 
   @Post('sign-up')

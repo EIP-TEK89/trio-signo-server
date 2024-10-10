@@ -1,7 +1,7 @@
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from './auth.model';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { hashPassword } from './functions/hashPassword.function';
 
@@ -60,15 +60,32 @@ export class AuthService {
   }
 
   async getUserById(id: string): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { id: String(id) } });
+    const user = await this.prisma.user.findUnique({
+      where: { id: String(id) },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 
   async getUserByEmail(email: string): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { email } });
+    const user = await this.prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { username } });
+    const user = await this.prisma.user.findUnique({ where: { username } });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 
   async updateUser(id: string, data: User): Promise<User> {
