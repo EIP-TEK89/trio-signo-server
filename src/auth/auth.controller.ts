@@ -23,7 +23,7 @@ import { AuthService } from './auth.service';
 import { User } from './auth.model';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { LoginDto } from './dto/login.dto';
+import { LoginDto } from './dto/log-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { Response } from 'express';
 
@@ -90,8 +90,13 @@ export class AuthController {
     status: 500,
     description: 'Internal server error.',
   })
-  async getUserById(@Param('id') id: string): Promise<User | null> {
-    return this.authService.getUserById(id);
+  async getUserById(@Param('id') id: string, @Res() res: Response) {
+    try {
+      const user = await this.authService.getUserById(id);
+      return res.status(200).send(user);
+    } catch (error) {
+      return res.status(404).send({ message: error.message });
+    }
   }
 
   @Get('users/email/:email')
@@ -118,8 +123,13 @@ export class AuthController {
     status: 500,
     description: 'Internal server error.',
   })
-  async getUserByEmail(@Param('email') email: string): Promise<User | null> {
-    return this.authService.getUserByEmail(email);
+  async getUserByEmail(@Param('email') email: string, @Res() res: Response) {
+    try {
+      const user = await this.authService.getUserByEmail(email);
+      return res.status(200).send(user);
+    } catch (error) {
+      return res.status(404).send({ message: error.message });
+    }
   }
 
   @Get('users/username/:username')
@@ -151,8 +161,14 @@ export class AuthController {
   })
   async getUserByUsername(
     @Param('username') username: string,
-  ): Promise<User | null> {
-    return this.authService.getUserByUsername(username);
+    @Res() res: Response,
+  ) {
+    try {
+      const user = await this.authService.getUserByUsername(username);
+      return res.status(200).send(user);
+    } catch (error) {
+      return res.status(404).send({ message: error.message });
+    }
   }
 
   @Post('sign-up')
@@ -169,8 +185,13 @@ export class AuthController {
     description: 'Error creating user',
   })
   @ApiBody({ type: SignUpDto })
-  async signUp(@Body() signUpDto: SignUpDto) {
-    return this.authService.signUp(signUpDto);
+  async signUp(@Body() signUpDto: SignUpDto, @Res() res: Response) {
+    try {
+      const user = await this.authService.signUp(signUpDto);
+      return res.status(201).send(user);
+    } catch (error) {
+      return res.status(400).send({ message: error.message });
+    }
   }
 
   @Post('log-in')
@@ -194,15 +215,22 @@ export class AuthController {
     },
   })
   @ApiBody({ type: LoginDto })
-  async login(@Body() loginDto: { email: string; password: string }) {
-    const user = await this.authService.validateUser(
-      loginDto.email,
-      loginDto.password,
-    );
-    if (!user) {
-      return { message: 'Invalid credentials' };
+  async login(
+    @Body() loginDto: { email: string; password: string },
+    @Res() res: Response,
+  ) {
+    try {
+      const user = await this.authService.validateUser(
+        loginDto.email,
+        loginDto.password,
+      );
+
+      const response = await this.authService.login(user);
+
+      return res.status(200).send(response);
+    } catch (error) {
+      return res.status(401).send({ message: error.message });
     }
-    return this.authService.login(user);
   }
 
   @Put('user/:id')

@@ -9,6 +9,7 @@ jest.mock('../functions/hashPassword.function', () => ({
 }));
 
 import { hashPassword } from '../functions/hashPassword.function';
+import { NotFoundException } from '@nestjs/common';
 
 class User {
   id: string;
@@ -79,10 +80,12 @@ describe('AuthService', () => {
       expect(result).toEqual(mockUser);
     });
 
-    it('should return null if credentials are invalid', async () => {
+    it('should throw an error if credentials are invalid', async () => {
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
-      const result = await service.validateUser('invalid@test.com', 'password');
-      expect(result).toBeNull();
+
+      await expect(
+        service.validateUser('invalid@test.com', 'password'),
+      ).rejects.toThrow('Invalid email or password');
     });
   });
 
@@ -111,6 +114,20 @@ describe('AuthService', () => {
       const result = await service.signUp(signUpInput);
 
       expect(result).toEqual({ access_token: 'mockedJwtToken' });
+    });
+
+    it('should throw an error if the user already exists', async () => {
+      const signUpInput = {
+        email: 'test@test.com',
+        username: 'testuser',
+        password: 'password123',
+      };
+
+      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
+
+      await expect(service.signUp(signUpInput)).rejects.toThrow(
+        'User already exists',
+      );
     });
   });
 
@@ -159,14 +176,12 @@ describe('AuthService', () => {
       });
     });
 
-    it('should return null if no user is found by ID', async () => {
+    it('should throw NotFoundException if no user is found by ID', async () => {
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
 
-      const result = await service.getUserById('999');
-      expect(result).toBeNull();
-      expect(prisma.user.findUnique).toHaveBeenCalledWith({
-        where: { id: '999' },
-      });
+      await expect(service.getUserById('999')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -181,14 +196,12 @@ describe('AuthService', () => {
       });
     });
 
-    it('should return null if no user is found by email', async () => {
+    it('should throw NotFoundException if no user is found by email', async () => {
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
 
-      const result = await service.getUserByEmail('notfound@test.com');
-      expect(result).toBeNull();
-      expect(prisma.user.findUnique).toHaveBeenCalledWith({
-        where: { email: 'notfound@test.com' },
-      });
+      await expect(service.getUserByEmail('notfound@test.com')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -203,14 +216,12 @@ describe('AuthService', () => {
       });
     });
 
-    it('should return null if no user is found by username', async () => {
+    it('should throw NotFoundException if no user is found by username', async () => {
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
 
-      const result = await service.getUserByUsername('notfounduser');
-      expect(result).toBeNull();
-      expect(prisma.user.findUnique).toHaveBeenCalledWith({
-        where: { username: 'notfounduser' },
-      });
+      await expect(service.getUserByUsername('notfounduser')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
