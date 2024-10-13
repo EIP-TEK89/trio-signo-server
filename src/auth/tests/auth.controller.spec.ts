@@ -19,6 +19,13 @@ describe('AuthController', () => {
     refreshToken: 'refreshToken',
   };
 
+  const mockResponse = () => {
+    const res: any = {};
+    res.status = jest.fn().mockReturnValue(res);
+    res.send = jest.fn().mockReturnValue(res);
+    return res;
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
@@ -62,24 +69,30 @@ describe('AuthController', () => {
 
   describe('getUserById', () => {
     it('should return a user by ID', async () => {
-      const result = await controller.getUserById('1');
-      expect(result).toEqual(mockUser);
+      const res = mockResponse();
+      await controller.getUserById('1', res);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith(mockUser);
       expect(service.getUserById).toHaveBeenCalledWith('1');
     });
   });
 
   describe('getUserByEmail', () => {
     it('should return a user by email', async () => {
-      const result = await controller.getUserByEmail('user@example.com');
-      expect(result).toEqual(mockUser);
+      const res = mockResponse();
+      await controller.getUserByEmail('user@example.com', res);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith(mockUser);
       expect(service.getUserByEmail).toHaveBeenCalledWith('user@example.com');
     });
   });
 
   describe('getUserByUsername', () => {
     it('should return a user by username', async () => {
-      const result = await controller.getUserByUsername('user1');
-      expect(result).toEqual(mockUser);
+      const res = mockResponse();
+      await controller.getUserByUsername('user1', res);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith(mockUser);
       expect(service.getUserByUsername).toHaveBeenCalledWith('user1');
     });
   });
@@ -91,8 +104,10 @@ describe('AuthController', () => {
         password: '123456',
         username: 'user1',
       };
-      const result = await controller.signUp(dto);
-      expect(result).toEqual({ access_token: 'mockedJwtToken' });
+      const res = mockResponse();
+      await controller.signUp(dto, res);
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.send).toHaveBeenCalledWith({ access_token: 'mockedJwtToken' });
       expect(service.signUp).toHaveBeenCalledWith(dto);
     });
   });
@@ -100,19 +115,27 @@ describe('AuthController', () => {
   describe('login', () => {
     it('should log in a user and return access_token', async () => {
       const dto: LoginDto = { email: 'user@example.com', password: '123456' };
-      const result = await controller.login(dto);
-      expect(result).toEqual({ access_token: 'mockedJwtToken' });
+      const res = mockResponse();
+      await controller.login(dto, res);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({ access_token: 'mockedJwtToken' });
       expect(service.login).toHaveBeenCalled();
     });
 
     it('should return "Invalid credentials" if the user is not found', async () => {
-      jest.spyOn(service, 'validateUser').mockResolvedValue(null);
+      jest
+        .spyOn(service, 'validateUser')
+        .mockRejectedValue(new Error('Invalid email or password'));
       const dto: LoginDto = {
         email: 'wronguser@example.com',
         password: 'wrongpassword',
       };
-      const result = await controller.login(dto);
-      expect(result).toEqual({ message: 'Invalid credentials' });
+      const res = mockResponse();
+      await controller.login(dto, res);
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.send).toHaveBeenCalledWith({
+        message: 'Invalid email or password',
+      });
     });
   });
 
