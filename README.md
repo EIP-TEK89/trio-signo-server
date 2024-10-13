@@ -7,9 +7,9 @@
 
 ## Description
 
-Back-end of Triosigno app using [Nest](https://github.com/nestjs/nest) with [Prisma](https://www.prisma.io/) and [PostgreSQL](https://www.postgresql.org/). All with [TypeScript](https://www.typescriptlang.org/).
+Back-end of Triosigno app using [Nest](https://nestjs.com/) with [Prisma](https://www.prisma.io/) and [PostgreSQL](https://www.postgresql.org/). All with [TypeScript](https://www.typescriptlang.org/).
 
-![Backend Architecture](https://via.placeholder.com/800x400.png?text=Backend+Architecture)
+![Backend Architecture](assets/diagrame.png)
 
 ## Installation
 
@@ -65,5 +65,6 @@ Contributions are welcome! Please read the [contributing guidelines](https://git
 For more information, please contact [antoine.rospars@epitech.eu](mailto:antoine.rospars@epitech.eu) or [yann.lebib@epitech.eu](mailto:yann.lebib@epitech.eu).
 
 ---
+
 <!--
 ![Logo](https://via.placeholder.com/150x50.png?text=Your+Logo) -->
