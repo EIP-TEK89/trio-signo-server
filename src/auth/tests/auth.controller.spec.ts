@@ -75,6 +75,16 @@ describe('AuthController', () => {
       expect(res.send).toHaveBeenCalledWith(mockUser);
       expect(service.getUserById).toHaveBeenCalledWith('1');
     });
+
+    it('should return "User not found" if the user is not found', async () => {
+      jest
+        .spyOn(service, 'getUserById')
+        .mockRejectedValue(new Error('User not found'));
+      const res = mockResponse();
+      await controller.getUserById('1', res);
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith({ message: 'User not found' });
+    });
   });
 
   describe('getUserByEmail', () => {
@@ -85,6 +95,16 @@ describe('AuthController', () => {
       expect(res.send).toHaveBeenCalledWith(mockUser);
       expect(service.getUserByEmail).toHaveBeenCalledWith('user@example.com');
     });
+
+    it('should return "User not found" if the user is not found', async () => {
+      jest
+        .spyOn(service, 'getUserByEmail')
+        .mockRejectedValue(new Error('User not found'));
+      const res = mockResponse();
+      await controller.getUserByEmail('false@exemple.com', res);
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith({ message: 'User not found' });
+    });
   });
 
   describe('getUserByUsername', () => {
@@ -94,6 +114,16 @@ describe('AuthController', () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.send).toHaveBeenCalledWith(mockUser);
       expect(service.getUserByUsername).toHaveBeenCalledWith('user1');
+    });
+
+    it('should return "User not found" if the user is not found', async () => {
+      jest
+        .spyOn(service, 'getUserByUsername')
+        .mockRejectedValue(new Error('User not found'));
+      const res = mockResponse();
+      await controller.getUserByUsername('falseuser', res);
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith({ message: 'User not found' });
     });
   });
 
