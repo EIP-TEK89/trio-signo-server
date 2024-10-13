@@ -110,6 +110,21 @@ describe('AuthController', () => {
       expect(res.send).toHaveBeenCalledWith({ access_token: 'mockedJwtToken' });
       expect(service.signUp).toHaveBeenCalledWith(dto);
     });
+
+    it('should return "User already exists" if the user is already registered', async () => {
+      jest
+        .spyOn(service, 'signUp')
+        .mockRejectedValue(new Error('User already exists'));
+      const dto: SignUpDto = {
+        email: 'user@example.com',
+        password: '123456',
+        username: 'user1',
+      };
+      const res = mockResponse();
+      await controller.signUp(dto, res);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({ message: 'User already exists' });
+    });
   });
 
   describe('login', () => {

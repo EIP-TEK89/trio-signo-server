@@ -115,6 +115,20 @@ describe('AuthService', () => {
 
       expect(result).toEqual({ access_token: 'mockedJwtToken' });
     });
+
+    it('should throw an error if the user already exists', async () => {
+      const signUpInput = {
+        email: 'test@test.com',
+        username: 'testuser',
+        password: 'password123',
+      };
+
+      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
+
+      await expect(service.signUp(signUpInput)).rejects.toThrow(
+        'User already exists',
+      );
+    });
   });
 
   describe('getAllUsers', () => {
