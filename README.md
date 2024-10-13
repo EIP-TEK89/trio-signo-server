@@ -58,11 +58,7 @@ $ npm run test:cov
 
 ## Contributing
 
-Contributions are welcome! Please read the [contributing guidelines](CONTRIBUTING.md) first.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Contributions are welcome! Please read the [contributing guidelines](https://github.com/EIP-TEK89/trio-signo-fullstack/blob/main/Contributing.md) first.
 
 ## Contact
 

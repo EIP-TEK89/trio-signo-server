@@ -1,8 +1,9 @@
-import { PrismaService } from 'prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from './auth.model';
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
+import { hashPassword } from './functions/hashPassword.function';
 
 @Injectable()
 export class AuthService {
@@ -28,7 +29,7 @@ export class AuthService {
   }
 
   async signUp(data: { email: string; username: string; password: string }) {
-    const hashedPassword = await this.hashPassword(data.password);
+    const hashedPassword = await hashPassword(data.password);
 
     const user = await this.prisma.user.create({
       data: {
@@ -60,26 +61,12 @@ export class AuthService {
     return this.prisma.user.findUnique({ where: { username } });
   }
 
-  async hashPassword(password: string): Promise<string> {
-    const saltRound = 10;
-    return await bcrypt.hash(password, saltRound);
-  }
-
-  async createUser(data: User): Promise<User> {
-    return this.prisma.user.create({
-      data: {
-        ...data,
-        password: await this.hashPassword(data.password),
-      },
-    });
-  }
-
   async updateUser(id: string, data: User): Promise<User> {
     return this.prisma.user.update({
       where: { id: String(id) },
       data: {
         ...data,
-        password: await this.hashPassword(data.password),
+        password: await hashPassword(data.password),
       },
     });
   }
@@ -107,8 +94,6 @@ export class AuthService {
         },
       });
     }
-
-    console.log('existingUser', existingUser);
 
     return existingUser;
   }

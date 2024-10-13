@@ -1,0 +1,33 @@
+name: Lint Codebase with ESLint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  eslint:
+    name: Run ESLint
+    runs-on: ubuntu-latest
+
+    steps:
+      # Verify the current repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Install Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Run ESLint to verify warning and errors
+      - name: Run ESLint
+        run: npm run lint
