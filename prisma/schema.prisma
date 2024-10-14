@@ -14,12 +14,34 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  username     String   @unique
-  password     String?
-  accessToken  String?
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  tokens Token[]
+}
+
+enum TokenType {
+  JWT
+  OAUTH_ACCESS
+  OAUTH_REFRESH
+}
+
+model Token {
+  id           String    @id @default(cuid())
+  userId       String
+  token        String
   refreshToken String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now()) @updatedAt
+  provider     String?
+  type         TokenType
+  createdAt    DateTime  @default(now())
+  expiresAt    DateTime
+  revoked      Boolean   @default(false)
+
+  user User @relation(fields: [userId], references: [id])
+
+  scope String? // 
 }
