@@ -89,6 +89,16 @@ export class AuthService {
   }
 
   async updateUser(id: string, data: User): Promise<User> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: String(id) },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    } else if (!data.password || !data.username || !data.email) {
+      throw new Error('Bad request. Invalid data');
+    }
+
     return this.prisma.user.update({
       where: { id: String(id) },
       data: {
@@ -99,9 +109,15 @@ export class AuthService {
   }
 
   async deleteUser(id: string): Promise<User> {
-    return this.prisma.user.delete({
+    const user = await this.prisma.user.findUnique({
       where: { id: String(id) },
     });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return this.prisma.user.delete({ where: { id: String(id) } });
   }
 
   async validateOAuthLogin(user: User): Promise<User> {

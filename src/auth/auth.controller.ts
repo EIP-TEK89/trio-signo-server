@@ -247,6 +247,7 @@ export class AuthController {
         id: 'ckp1z7z9d0000z3l7z9d0000z',
         email: 'user@example.com',
         username: 'updatedUsername123',
+        password: 'hashedPassword',
       },
     },
   })
@@ -262,8 +263,21 @@ export class AuthController {
     status: 500,
     description: 'Internal server error.',
   })
-  async updateUser(@Param('id') id: string, @Body() data: User): Promise<User> {
-    return this.authService.updateUser(id, data);
+  async updateUser(
+    @Param('id') id: string,
+    @Body() data: User,
+    @Res() res: Response,
+  ) {
+    try {
+      const user = await this.authService.updateUser(id, data);
+      return res.status(200).send(user);
+    } catch (error) {
+      if (error.message === 'User not found') {
+        return res.status(404).send({ message: error.message });
+      } else {
+        return res.status(400).send({ message: error.message });
+      }
+    }
   }
 
   @Delete('user/:id')
@@ -290,8 +304,13 @@ export class AuthController {
     status: 500,
     description: 'Internal server error.',
   })
-  async deleteUser(@Param('id') id: string): Promise<User> {
-    return this.authService.deleteUser(id);
+  async deleteUser(@Param('id') id: string, @Res() res: Response) {
+    try {
+      const user = await this.authService.deleteUser(id);
+      return res.status(200).send(user);
+    } catch (error) {
+      return res.status(404).send({ message: error.message });
+    }
   }
 
   // Google OAuth2.0
