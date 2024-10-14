@@ -53,6 +53,16 @@ model Exercise {
   lesson Lesson @relation(fields: [lessonId], references: [id])
 }
 
+enum Roles {
+  ADMIN
+  USER
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+}
+
 // Users model
 model User {
   id           String   @id @default(cuid()) // Primary key
@@ -64,6 +74,10 @@ model User {
   refreshToken String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  // Roles
+  role               Roles              @default(USER)
+  subscriptionStatus SubscriptionStatus @default(INACTIVE)
 
   // Relations
   userProgress UserProgress[] // 1 User has many UserProgress
