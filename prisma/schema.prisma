@@ -13,13 +13,72 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Categories model
+model Category {
+  id          String  @id @default(cuid()) // Primary key
+  name        String
+  description String?
+
+  // Relations
+  lessons Lesson[] // 1 Category has many Lessons
+}
+
+// Lessons model
+model Lesson {
+  id              String   @id @default(cuid()) // Primary key
+  title           String
+  description     String?
+  difficultyLevel String
+  categoryId      String // Foreign key
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  category     Category       @relation(fields: [categoryId], references: [id])
+  exercises    Exercise[] // 1 Lesson has many Exercises
+  userProgress UserProgress[] // 1 Lesson has many UserProgress
+}
+
+// Exercises model
+model Exercise {
+  id       String  @id @default(cuid()) // Primary key
+  lessonId String // Foreign key
+  type     String
+  question String
+  answer   String
+  hint     String?
+  mediaUrl String?
+
+  // Relations
+  lesson Lesson @relation(fields: [lessonId], references: [id])
+}
+
+// Users model
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String   @id @default(cuid()) // Primary key
   username     String   @unique
+  email        String   @unique
   password     String?
+  token        String?
   accessToken  String?
   refreshToken String?
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now()) @updatedAt
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  userProgress UserProgress[] // 1 User has many UserProgress
+}
+
+// User_Progress model
+model UserProgress {
+  id               String   @id @default(cuid()) // Primary key
+  userId           String // Foreign key
+  lessonId         String // Foreign key
+  completionStatus String
+  score            Int
+  lastAccessed     DateTime @default(now())
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id])
+  lesson Lesson @relation(fields: [lessonId], references: [id])
 }
