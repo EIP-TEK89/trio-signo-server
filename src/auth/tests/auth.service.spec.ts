@@ -249,6 +249,7 @@ describe('AuthService', () => {
       (hashPassword as jest.Mock).mockResolvedValue('hashedUpdatedPassword');
 
       jest.spyOn(prisma.user, 'update').mockResolvedValue(mockUpdatedUser);
+      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
 
       const result = await service.updateUser('1', updatedData as User);
 
@@ -263,6 +264,34 @@ describe('AuthService', () => {
           password: 'hashedUpdatedPassword',
         },
       });
+    });
+
+    it('should handle cases where the user is not found', async () => {
+      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
+
+      await expect(
+        service.updateUser('nonexistent-id', {} as User),
+      ).rejects.toThrow('User not found');
+
+      expect(prisma.user.update).not.toHaveBeenCalled();
+    });
+
+    it('should handle cases where the data are invalid', async () => {
+      const invalidData = {
+        email: 'updated@test.com',
+        username: 'updateduser',
+        password: '', // Password vide
+        accessToken: 'updatedAccessToken',
+        refreshToken: 'updatedRefreshToken',
+      };
+
+      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
+
+      await expect(
+        service.updateUser('1', invalidData as User),
+      ).rejects.toThrow('Bad request. Invalid data');
+
+      expect(prisma.user.update).not.toHaveBeenCalled();
     });
   });
 
@@ -279,29 +308,25 @@ describe('AuthService', () => {
         updatedAt: new Date(),
       };
 
+      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockDeletedUser);
       jest.spyOn(prisma.user, 'delete').mockResolvedValue(mockDeletedUser);
 
       const result = await service.deleteUser('1');
 
       expect(result).toEqual(mockDeletedUser);
-
       expect(prisma.user.delete).toHaveBeenCalledWith({
         where: { id: '1' },
       });
     });
 
     it('should handle cases where the user is not found', async () => {
-      jest
-        .spyOn(prisma.user, 'delete')
-        .mockRejectedValue(new Error('User not found'));
+      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
 
       await expect(service.deleteUser('nonexistent-id')).rejects.toThrow(
         'User not found',
       );
 
-      expect(prisma.user.delete).toHaveBeenCalledWith({
-        where: { id: 'nonexistent-id' },
-      });
+      expect(prisma.user.delete).not.toHaveBeenCalled();
     });
   });
 

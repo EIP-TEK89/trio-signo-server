@@ -186,17 +186,57 @@ describe('AuthController', () => {
 
   describe('updateUser', () => {
     it('should update a user', async () => {
-      const result = await controller.updateUser('1', mockUser);
-      expect(result).toEqual(mockUser);
+      const res = mockResponse();
+
+      await controller.updateUser('1', mockUser, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith(mockUser);
       expect(service.updateUser).toHaveBeenCalledWith('1', mockUser);
+    });
+
+    it('should return "User not found" if the user is not found', async () => {
+      jest
+        .spyOn(service, 'updateUser')
+        .mockRejectedValue(new Error('User not found'));
+      const res = mockResponse();
+      await controller.updateUser('1', mockUser, res);
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith({ message: 'User not found' });
+    });
+
+    it('should return "Bad request. Invalid data" if the data is invalid', async () => {
+      jest
+        .spyOn(service, 'updateUser')
+        .mockRejectedValue(new Error('Bad request. Invalid data'));
+      const res = mockResponse();
+      await controller.updateUser('1', mockUser, res);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({
+        message: 'Bad request. Invalid data',
+      });
     });
   });
 
   describe('deleteUser', () => {
     it('should delete a user', async () => {
-      const result = await controller.deleteUser('1');
-      expect(result).toEqual(mockUser);
+      const res = mockResponse();
+
+      await controller.deleteUser('1', res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith(mockUser);
       expect(service.deleteUser).toHaveBeenCalledWith('1');
+    });
+
+    it('should return "User not found" if the user is not found', async () => {
+      jest
+        .spyOn(service, 'deleteUser')
+        .mockRejectedValue(new Error('User not found'));
+      const res = mockResponse();
+      await controller.deleteUser('1', res);
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith({ message: 'User not found' });
     });
   });
 
