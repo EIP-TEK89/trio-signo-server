@@ -4,7 +4,7 @@ import { AuthService } from '../auth.service';
 // import { JwtAuthGuard } from '../jwt-auth.guard';
 import { User } from '../auth.model';
 import { SignUpDto } from '../dto/sign-up.dto';
-import { LoginDto } from '../dto/login.dto';
+import { LoginDto } from '../dto/log-in.dto';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -17,6 +17,13 @@ describe('AuthController', () => {
     password: 'hashedPassword',
     accessToken: 'accessToken',
     refreshToken: 'refreshToken',
+  };
+
+  const mockResponse = () => {
+    const res: any = {};
+    res.status = jest.fn().mockReturnValue(res);
+    res.send = jest.fn().mockReturnValue(res);
+    return res;
   };
 
   beforeEach(async () => {
@@ -62,25 +69,61 @@ describe('AuthController', () => {
 
   describe('getUserById', () => {
     it('should return a user by ID', async () => {
-      const result = await controller.getUserById('1');
-      expect(result).toEqual(mockUser);
+      const res = mockResponse();
+      await controller.getUserById('1', res);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith(mockUser);
       expect(service.getUserById).toHaveBeenCalledWith('1');
+    });
+
+    it('should return "User not found" if the user is not found', async () => {
+      jest
+        .spyOn(service, 'getUserById')
+        .mockRejectedValue(new Error('User not found'));
+      const res = mockResponse();
+      await controller.getUserById('1', res);
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith({ message: 'User not found' });
     });
   });
 
   describe('getUserByEmail', () => {
     it('should return a user by email', async () => {
-      const result = await controller.getUserByEmail('user@example.com');
-      expect(result).toEqual(mockUser);
+      const res = mockResponse();
+      await controller.getUserByEmail('user@example.com', res);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith(mockUser);
       expect(service.getUserByEmail).toHaveBeenCalledWith('user@example.com');
+    });
+
+    it('should return "User not found" if the user is not found', async () => {
+      jest
+        .spyOn(service, 'getUserByEmail')
+        .mockRejectedValue(new Error('User not found'));
+      const res = mockResponse();
+      await controller.getUserByEmail('false@exemple.com', res);
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith({ message: 'User not found' });
     });
   });
 
   describe('getUserByUsername', () => {
     it('should return a user by username', async () => {
-      const result = await controller.getUserByUsername('user1');
-      expect(result).toEqual(mockUser);
+      const res = mockResponse();
+      await controller.getUserByUsername('user1', res);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith(mockUser);
       expect(service.getUserByUsername).toHaveBeenCalledWith('user1');
+    });
+
+    it('should return "User not found" if the user is not found', async () => {
+      jest
+        .spyOn(service, 'getUserByUsername')
+        .mockRejectedValue(new Error('User not found'));
+      const res = mockResponse();
+      await controller.getUserByUsername('falseuser', res);
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith({ message: 'User not found' });
     });
   });
 
@@ -91,44 +134,109 @@ describe('AuthController', () => {
         password: '123456',
         username: 'user1',
       };
-      const result = await controller.signUp(dto);
-      expect(result).toEqual({ access_token: 'mockedJwtToken' });
+      const res = mockResponse();
+      await controller.signUp(dto, res);
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.send).toHaveBeenCalledWith({ access_token: 'mockedJwtToken' });
       expect(service.signUp).toHaveBeenCalledWith(dto);
+    });
+
+    it('should return "User already exists" if the user is already registered', async () => {
+      jest
+        .spyOn(service, 'signUp')
+        .mockRejectedValue(new Error('User already exists'));
+      const dto: SignUpDto = {
+        email: 'user@example.com',
+        password: '123456',
+        username: 'user1',
+      };
+      const res = mockResponse();
+      await controller.signUp(dto, res);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({ message: 'User already exists' });
     });
   });
 
   describe('login', () => {
     it('should log in a user and return access_token', async () => {
       const dto: LoginDto = { email: 'user@example.com', password: '123456' };
-      const result = await controller.login(dto);
-      expect(result).toEqual({ access_token: 'mockedJwtToken' });
+      const res = mockResponse();
+      await controller.login(dto, res);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({ access_token: 'mockedJwtToken' });
       expect(service.login).toHaveBeenCalled();
     });
 
     it('should return "Invalid credentials" if the user is not found', async () => {
-      jest.spyOn(service, 'validateUser').mockResolvedValue(null);
+      jest
+        .spyOn(service, 'validateUser')
+        .mockRejectedValue(new Error('Invalid email or password'));
       const dto: LoginDto = {
         email: 'wronguser@example.com',
         password: 'wrongpassword',
       };
-      const result = await controller.login(dto);
-      expect(result).toEqual({ message: 'Invalid credentials' });
+      const res = mockResponse();
+      await controller.login(dto, res);
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.send).toHaveBeenCalledWith({
+        message: 'Invalid email or password',
+      });
     });
   });
 
   describe('updateUser', () => {
     it('should update a user', async () => {
-      const result = await controller.updateUser('1', mockUser);
-      expect(result).toEqual(mockUser);
+      const res = mockResponse();
+
+      await controller.updateUser('1', mockUser, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith(mockUser);
       expect(service.updateUser).toHaveBeenCalledWith('1', mockUser);
+    });
+
+    it('should return "User not found" if the user is not found', async () => {
+      jest
+        .spyOn(service, 'updateUser')
+        .mockRejectedValue(new Error('User not found'));
+      const res = mockResponse();
+      await controller.updateUser('1', mockUser, res);
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith({ message: 'User not found' });
+    });
+
+    it('should return "Bad request. Invalid data" if the data is invalid', async () => {
+      jest
+        .spyOn(service, 'updateUser')
+        .mockRejectedValue(new Error('Bad request. Invalid data'));
+      const res = mockResponse();
+      await controller.updateUser('1', mockUser, res);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({
+        message: 'Bad request. Invalid data',
+      });
     });
   });
 
   describe('deleteUser', () => {
     it('should delete a user', async () => {
-      const result = await controller.deleteUser('1');
-      expect(result).toEqual(mockUser);
+      const res = mockResponse();
+
+      await controller.deleteUser('1', res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith(mockUser);
       expect(service.deleteUser).toHaveBeenCalledWith('1');
+    });
+
+    it('should return "User not found" if the user is not found', async () => {
+      jest
+        .spyOn(service, 'deleteUser')
+        .mockRejectedValue(new Error('User not found'));
+      const res = mockResponse();
+      await controller.deleteUser('1', res);
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith({ message: 'User not found' });
     });
   });
 
