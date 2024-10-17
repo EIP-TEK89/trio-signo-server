@@ -12,6 +12,22 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
+  async generateToken(
+    user: User,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const payload = { username: user.username, sub: user.id };
+
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: '15m',
+    });
+
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: '7d',
+    });
+
+    return { accessToken, refreshToken };
+  }
+
   async validateUser(email: string, pass: string): Promise<User | null> {
     const user = await this.prisma.user.findUnique({ where: { email } });
 
@@ -22,11 +38,21 @@ export class AuthService {
   }
 
   async login(user: User) {
-    const payload = { username: user.username, sub: user.id };
-    const token = this.jwtService.sign(payload);
+    const { accessToken, refreshToken } = await this.generateToken(user);
+
+    await this.prisma.token.create({
+      data: {
+        userId: user.id,
+        token: accessToken,
+        refreshToken: refreshToken,
+        type: 'JWT',
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      },
+    });
 
     return {
-      access_token: token,
+      access_token: accessToken,
+      refresh_token: refreshToken,
     };
   }
 
