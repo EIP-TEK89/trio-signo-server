@@ -12,7 +12,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async generateToken(
+  async generateTokens(
     user: User,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const payload = { username: user.username, sub: user.id };
@@ -28,6 +28,65 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
+  async refreshTokens(
+    refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    try {
+      const decoded = this.jwtService.verify(refreshToken);
+
+      const existingToken = await this.prisma.token.findFirst({
+        where: {
+          refreshToken: refreshToken,
+          userId: decoded.sub,
+          revoked: false,
+        },
+      });
+
+      if (!existingToken) {
+        throw new Error('Invalid refresh token');
+      }
+
+      const user = await this.prisma.user.findUnique({
+        where: { id: decoded.sub },
+      });
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      await this.prisma.token.update({
+        where: { id: existingToken.id },
+        data: { revoked: true },
+      });
+
+      const { accessToken, refreshToken: newRefreshToken } =
+        await this.generateTokens(user);
+
+      await this.prisma.token.create({
+        data: {
+          userId: user.id,
+          token: accessToken,
+          refreshToken: newRefreshToken,
+          type: 'JWT',
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        },
+      });
+
+      return { accessToken, refreshToken: newRefreshToken };
+    } catch (error) {
+      throw new Error('Invalid refresh token');
+    }
+  }
+
+  async cleanUpExpiredTokens() {
+    await this.prisma.token.deleteMany({
+      where: {
+        expiresAt: { lte: new Date() },
+        revoked: false,
+      },
+    });
+  }
+
   async validateUser(email: string, pass: string): Promise<User | null> {
     const user = await this.prisma.user.findUnique({ where: { email } });
 
@@ -38,7 +97,7 @@ export class AuthService {
   }
 
   async login(user: User) {
-    const { accessToken, refreshToken } = await this.generateToken(user);
+    const { accessToken, refreshToken } = await this.generateTokens(user);
 
     await this.prisma.token.create({
       data: {
