@@ -4,6 +4,7 @@ import { User } from './auth.model';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { hashPassword } from './functions/hashPassword.function';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class AuthService {
@@ -78,6 +79,7 @@ export class AuthService {
     }
   }
 
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async cleanUpExpiredTokens() {
     await this.prisma.token.deleteMany({
       where: {
