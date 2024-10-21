@@ -26,8 +26,7 @@ model User {
 
 enum TokenType {
   JWT
-  OAUTH_ACCESS
-  OAUTH_REFRESH
+  OAUTH
 }
 
 model Token {

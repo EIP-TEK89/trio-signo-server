@@ -81,12 +81,13 @@ export class AuthService {
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async cleanUpExpiredTokens() {
-    await this.prisma.token.deleteMany({
+    const deleted = await this.prisma.token.deleteMany({
       where: {
         expiresAt: { lte: new Date() },
         revoked: false,
       },
     });
+    console.log(`Deleted ${deleted.count} expired tokens`);
   }
 
   async validateUser(email: string, pass: string): Promise<User | null> {
@@ -107,7 +108,7 @@ export class AuthService {
         token: accessToken,
         refreshToken: refreshToken,
         type: 'JWT',
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days of validity
       },
     });
 
@@ -136,9 +137,22 @@ export class AuthService {
       },
     });
 
-    const payload = { username: user.username, sub: user.id };
+    const { accessToken, refreshToken } = await this.generateTokens(user);
+
+    await this.prisma.token.create({
+      data: {
+        userId: user.id,
+        token: accessToken,
+        refreshToken: refreshToken,
+        type: 'JWT',
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 jours de validité
+        revoked: false,
+      },
+    });
+
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: accessToken,
+      refresh_token: refreshToken,
     };
   }
 
@@ -203,11 +217,20 @@ export class AuthService {
         data: {
           email,
           username,
-          accessToken,
-          refreshToken,
         },
       });
     }
+
+    await this.prisma.token.create({
+      data: {
+        userId: existingUser.id,
+        token: accessToken,
+        refreshToken: refreshToken, // refresh of the OAuth token
+        type: 'OAUTH',
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days of validity
+        revoked: false,
+      },
+    });
 
     return existingUser;
   }

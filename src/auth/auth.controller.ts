@@ -32,30 +32,6 @@ import { Response } from 'express';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Post('refresh')
-  @ApiOperation({ summary: 'Refresh access token using refresh token' })
-  @ApiResponse({
-    status: 200,
-    description: 'New access token generated',
-    schema: {
-      example: {
-        access_token: 'newJwtToken',
-        refresh_token: 'newRefreshToken',
-      },
-    },
-  })
-  async refresh(
-    @Body('refreshToken') refreshToken: string,
-    @Res() res: Response,
-  ) {
-    try {
-      const newTokens = await this.authService.refreshTokens(refreshToken);
-      return res.status(200).send(newTokens);
-    } catch (error) {
-      return res.status(401).send({ message: 'Invalid refresh token' });
-    }
-  }
-
   @Get('users')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
@@ -254,6 +230,30 @@ export class AuthController {
       return res.status(200).send(response);
     } catch (error) {
       return res.status(401).send({ message: error.message });
+    }
+  }
+
+  @Post('refresh')
+  @ApiOperation({ summary: 'Refresh access token using refresh token' })
+  @ApiResponse({
+    status: 200,
+    description: 'New access token generated',
+    schema: {
+      example: {
+        access_token: 'newJwtToken',
+        refresh_token: 'newRefreshToken',
+      },
+    },
+  })
+  async refresh(
+    @Body('refreshToken') refreshToken: string,
+    @Res() res: Response,
+  ) {
+    try {
+      const newTokens = await this.authService.refreshTokens(refreshToken);
+      return res.status(200).send(newTokens);
+    } catch (error) {
+      return res.status(401).send({ message: 'Invalid refresh token' });
     }
   }
 
