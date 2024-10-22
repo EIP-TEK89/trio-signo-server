@@ -35,7 +35,7 @@ model Token {
   token        String
   refreshToken String?
   provider     String? // Google, Facebook, etc. if OAuth
-  type         TokenType // JWT, OAUTH_ACCESS, OAUTH_REFRESH
+  type         TokenType // JWT, OAUTH
   createdAt    DateTime  @default(now())
   expiresAt    DateTime
   revoked      Boolean   @default(false)
