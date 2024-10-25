@@ -14,12 +14,33 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  username     String   @unique
-  password     String?
-  accessToken  String?
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String? // Null if OAuth
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  tokens Token[] // Foreign key
+}
+
+enum TokenType {
+  JWT
+  OAUTH
+}
+
+model Token {
+  id           String    @id @default(cuid())
+  userId       String // Foreign key
+  token        String
   refreshToken String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now()) @updatedAt
+  provider     String? // Google, Facebook, etc. if OAuth
+  type         TokenType // JWT, OAUTH
+  createdAt    DateTime  @default(now())
+  expiresAt    DateTime
+  revoked      Boolean   @default(false)
+
+  user User @relation(fields: [userId], references: [id]) // Foreign key
+
+  scope String? // For OAuth
 }

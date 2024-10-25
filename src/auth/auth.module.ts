@@ -7,6 +7,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GoogleStrategy } from './google.strategy';
+import { ScheduleModule } from '@nestjs/schedule';
 @Module({
   imports: [
     PassportModule,
@@ -19,6 +20,7 @@ import { GoogleStrategy } from './google.strategy';
       }),
     }),
     ConfigModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, PrismaService, GoogleStrategy],
