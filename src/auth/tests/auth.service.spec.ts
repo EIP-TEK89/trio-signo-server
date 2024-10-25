@@ -51,6 +51,9 @@ describe('AuthService', () => {
               update: jest.fn(),
               delete: jest.fn(),
             },
+            token: {
+              create: jest.fn(),
+            },
           },
         },
         {
@@ -92,7 +95,10 @@ describe('AuthService', () => {
   describe('login', () => {
     it('should return access_token on successful login', async () => {
       const result = await service.login(mockUser);
-      expect(result).toEqual({ access_token: 'mockedJwtToken' });
+      expect(result).toEqual({
+        access_token: 'mockedJwtToken',
+        refresh_token: 'mockedJwtToken',
+      });
     });
   });
 
@@ -113,7 +119,10 @@ describe('AuthService', () => {
 
       const result = await service.signUp(signUpInput);
 
-      expect(result).toEqual({ access_token: 'mockedJwtToken' });
+      expect(result).toEqual({
+        access_token: 'mockedJwtToken',
+        refresh_token: 'mockedJwtToken',
+      });
     });
 
     it('should throw an error if the user already exists', async () => {
@@ -380,8 +389,6 @@ describe('AuthService', () => {
         data: {
           email: 'oauthuser@test.com',
           username: 'oauthuser',
-          accessToken: 'oauthAccessToken',
-          refreshToken: 'oauthRefreshToken',
         },
       });
     });
