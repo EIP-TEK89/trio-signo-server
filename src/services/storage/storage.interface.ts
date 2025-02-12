@@ -5,5 +5,9 @@ export interface IStorageService {
    */
   getUrl(filePath: string): Promise<string>;
 
-  // You can add more methods as needed (e.g., uploadFile, deleteFile, etc.)
+  /**
+   * Returns a list of files in a bucket.
+   * @param folder - The prefix to filter the files.
+   */
+  listFiles(search?: string): Promise<string[]>;
 }

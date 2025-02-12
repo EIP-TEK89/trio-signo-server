@@ -51,4 +51,18 @@ export class SupabaseStorageService implements IStorageService {
     }
     return data.publicUrl;
   }
+
+  /**
+   * Returns a list of files in the Supabase bucket.
+   * @param folder - The prefix to filter the files.
+   */
+  async listFiles(folder?: string): Promise<string[]> {
+    const { data, error } = await this.client.storage.from(this.bucket).list(folder);
+
+    if (error) {
+      this.logger.error(`Error listing files: ${error.message}`);
+      throw new InternalServerErrorException(`Error listing files: ${error.message}`);
+    }
+    return data.map((file) => file.name);
+  }
 }
