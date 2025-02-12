@@ -10,23 +10,8 @@ export class DictionaryService {
     {
       name: 'A',
       description: 'La lettre A',
+      path: 'A/a.jpeg',
     },
-    {
-      name: 'B',
-      description: 'La lettre B',
-    },
-    {
-      name: 'C',
-      description: 'La lettre C',
-    },
-    {
-      name: 'D',
-      description: 'La lettre D',
-    },
-    {
-      name: 'E',
-      description: 'La lettre E',
-    }
   ];
 
   constructor(
@@ -36,7 +21,7 @@ export class DictionaryService {
   async getAllSigns(): Promise<Sign[]> {
     const signsWithUrls = await Promise.all(
       this.signs.map(async (sign) => {
-        const sourceUrl = await this.storageService.getUrl(sign.name);
+        const sourceUrl = await this.storageService.getUrl(sign.path);
         return { ...sign, sourceUrl };
       }),
     );
@@ -50,7 +35,7 @@ export class DictionaryService {
     }
     const signsWithUrls = await Promise.all(
       signs.map(async (sign) => {
-        const sourceUrl = await this.storageService.getUrl(sign.name);
+        const sourceUrl = await this.storageService.getUrl(sign.path);
         return { ...sign, sourceUrl };
       }),
     );
