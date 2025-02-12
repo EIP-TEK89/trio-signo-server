@@ -1,4 +1,3 @@
-// src/lsf/lsf.controller.ts
 import { Controller, Get, Param } from '@nestjs/common';
 import { DictionaryService } from './dictionary.service';
 import { Sign } from './sign.interface';

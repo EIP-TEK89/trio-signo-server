@@ -1,4 +1,3 @@
-// src/lsf/lsf.service.ts
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { IStorageService } from '../../services/storage/storage.interface';
 import { Sign } from './sign.interface';

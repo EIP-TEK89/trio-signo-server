@@ -1,4 +1,3 @@
-// src/lsf/interfaces/storage.interface.ts
 export interface IStorageService {
   /**
    * Returns a signed URL for a file stored in a bucket.

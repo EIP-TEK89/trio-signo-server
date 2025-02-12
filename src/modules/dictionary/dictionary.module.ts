@@ -1,4 +1,3 @@
-// src/lsf/lsf.module.ts
 import { Module } from '@nestjs/common';
 import { DictionaryController } from './dictionary.controller';
 import { DictionaryService } from './dictionary.service';
