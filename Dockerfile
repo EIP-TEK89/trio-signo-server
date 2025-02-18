@@ -1,4 +1,4 @@
-FROM node:alpine AS builder
+FROM node:23.8-alpine3.20 AS builder
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ RUN npm run build
 
 RUN npx prisma generate
 
-FROM node:alpine
+FROM node:23.8-alpine3.20
 
 WORKDIR /app
 
