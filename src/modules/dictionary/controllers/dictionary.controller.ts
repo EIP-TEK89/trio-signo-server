@@ -1,7 +1,7 @@
-import { Body, Controller, Get, Logger, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Logger, Param, Post } from '@nestjs/common';
 import { DictionaryService } from '../services/dictionary.service';
 import { Prisma, Sign as PrismaSign} from '@prisma/client';
-import { ApiBody, ApiCreatedResponse, ApiFoundResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateSignDto } from '../dtos/create-sign.dto';
 import { Sign } from '../sign.entity';
 
@@ -36,5 +36,12 @@ export class DictionaryController {
   @ApiNoContentResponse({ description: 'No sign found with the given name.' })
   async searchSign(@Param('name') name: string): Promise<PrismaSign[]> {
     return await this.dictionaryService.searchSign(name);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete a sign by ID' }) 
+  @ApiOkResponse({ description: 'The sign has been successfully deleted.' })
+  async deleteSign(@Param('id') id: string): Promise<void> {
+    await this.dictionaryService.deleteSign(id);
   }
 }

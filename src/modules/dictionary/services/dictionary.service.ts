@@ -55,7 +55,7 @@ export class DictionaryService {
     return sign;
   }
 
-  async createSign(sign: Prisma.SignCreateInput): Promise<Sign> {
+  async createSign(sign: CreateSignDto): Promise<Sign> {
     const newSign = await this.prisma.sign.create({
       data: sign,
     });

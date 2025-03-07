@@ -15,7 +15,7 @@ export class Sign {
   word: string;
 
   @ApiProperty({
-    example: 'A letter',
+    example: 'La lettre A',
     description: 'The definition of the sign',
     required: false,
   })
