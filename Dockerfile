@@ -1,24 +1,23 @@
-# Use the official image as a parent image
-FROM node:23.8-alpine3.20
+# Base image
+FROM node:23
 
-# Set the working directory
+# Create app directory
 WORKDIR /usr/src/app
 
-# Copy the file from your host to your current location
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
 COPY package*.json ./
-COPY prisma ./prisma/
 
-# Install any needed packages specified in package.json
+# Install app dependencies
 RUN npm install
 
-# Generate Prisma Client 
-RUN npx prisma generate
-
-# Copy the rest of the application code
+# Bundle app source
 COPY . .
 
-# Inform Docker that the container is listening on the specified port at runtime.
-EXPOSE 3000
+# Generate prisma client
+RUN npx prisma generate
 
-# Run the specified command within the container. Dev mode
-CMD ["npm", "run", "start:dev"]
+# Creates a "dist" folder with the production build
+RUN npm run build
+
+# Start the server using the production build
+CMD [ "node", "dist/main.js" ]
