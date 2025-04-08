@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { DictionaryController } from './controllers/dictionary.controller';
+import { DictionaryController } from './dictionary.controller';
 import { DictionaryService } from './services/dictionary.service';
 import { SupabaseStorageService } from '../../services/storage/supabase.service';
 import { PrismaService } from 'prisma/prisma.service';

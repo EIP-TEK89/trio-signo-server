@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,42 +8,63 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  username  String   @unique
-  password  String? // Null if OAuth
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  tokens Token[] // Foreign key
+  id          String       @id @default(cuid())
+  email       String       @unique
+  username    String       @unique
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @default(now()) @updatedAt
+  avatarUrl   String?
+  firstName   String?
+  lastName    String?
+  role        UserRole     @default(USER)
+  authMethods AuthMethod[]
 }
 
-enum TokenType {
-  JWT
-  OAUTH
+model AuthMethod {
+  id             String         @id @default(cuid())
+  userId         String
+  type           AuthMethodType
+  identifier     String
+  credential     String?
+  refreshToken   String?
+  isVerified     Boolean        @default(false)
+  lastUsedAt     DateTime?
+  failedAttempts Int            @default(0)
+  lockedUntil    DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @default(now()) @updatedAt
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokens         Token[]
+
+  @@unique([userId, type, identifier])
 }
 
 model Token {
-  id           String    @id @default(cuid())
-  userId       String // Foreign key
-  token        String
-  refreshToken String?
-  provider     String? // Google, Facebook, etc. if OAuth
-  type         TokenType // JWT, OAUTH
-  createdAt    DateTime  @default(now())
+  id           String     @id @default(cuid())
+  token        String     @unique
+  createdAt    DateTime   @default(now())
   expiresAt    DateTime
-  revoked      Boolean   @default(false)
-
-  user User @relation(fields: [userId], references: [id]) // Foreign key
-
-  scope String? // For OAuth
+  revoked      Boolean    @default(false)
+  authMethodId String
+  authMethod   AuthMethod @relation(fields: [authMethodId], references: [id], onDelete: Cascade)
 }
 
 model Sign {
-  id          String   @id @default(cuid())
-  word        String
-  definition  String? // Null if no definition
-  mediaUrl    String? // URL to image or video
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt
+  id         String   @id @default(cuid())
+  word       String
+  definition String?
+  mediaUrl   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+}
+
+enum AuthMethodType {
+  LOCAL
+  GOOGLE
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  MODERATOR
 }
