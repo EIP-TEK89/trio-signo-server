@@ -1,11 +1,13 @@
 import { Body, Controller, Delete, Get, Logger, Param, Post, NotFoundException } from '@nestjs/common';
-import { DictionaryService } from '../services/dictionary.service';
+import { DictionaryService } from './services/dictionary.service';
 import { Prisma, Sign as PrismaSign} from '@prisma/client';
 import { ApiBody, ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CreateSignDto } from '../dtos/create-sign.dto';
-import { Sign } from '../sign.entity';
+import { CreateSignDto } from './dtos/create-sign.dto';
+import { Sign } from './sign.entity';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('Dictionary')
+@Public()
 @Controller('signs')
 export class DictionaryController {
   private readonly logger = new Logger(DictionaryController.name);
