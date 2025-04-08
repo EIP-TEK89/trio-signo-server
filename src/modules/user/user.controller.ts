@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, HttpStatus, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, HttpStatus, ParseIntPipe, DefaultValuePipe, Logger } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -10,6 +10,8 @@ import { IUser, PaginatedUsers, IUserQueryOptions } from './interfaces/user.inte
 @ApiTags('Users')
 @Controller('users')
 export class UserController {
+  private readonly logger = new Logger(UserController.name);
+  
   constructor(private readonly userService: UserService) {}
 
   @Post()
@@ -28,6 +30,7 @@ export class UserController {
     description: 'User with that username or email already exists.' 
   })
   async create(@Body() createUserDto: CreateUserDto): Promise<IUser> {
+    this.logger.log(`Creating new user with username: ${createUserDto.username}`);
     return this.userService.create(createUserDto);
   }
 
@@ -48,6 +51,14 @@ export class UserController {
     @Query('orderBy') orderByString?: string,
     @Query('search') search?: string,
   ): Promise<PaginatedUsers> {
+    this.logger.log(`Finding all users with pagination: skip=${skip}, take=${take}`);
+    if (search) {
+      this.logger.log(`Search term: ${search}`);
+    }
+    if (orderByString) {
+      this.logger.log(`Order by: ${orderByString}`);
+    }
+    
     // Convert REST API query params to our interface options
     const options: IUserQueryOptions = {
       skip,
@@ -63,6 +74,8 @@ export class UserController {
           field: field as keyof IUser,
           direction: direction === 'desc' ? 'desc' : 'asc'
         };
+      } else {
+        this.logger.warn(`Invalid orderBy field: ${field}`);
       }
     }
     
@@ -82,6 +95,7 @@ export class UserController {
     description: 'User not found' 
   })
   async findOne(@Param('id') id: string): Promise<IUser> {
+    this.logger.log(`Finding user by ID: ${id}`);
     return this.userService.findOne(id);
   }
 
@@ -106,6 +120,7 @@ export class UserController {
     description: 'User with that username or email already exists.' 
   })
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto): Promise<IUser> {
+    this.logger.log(`Updating user with ID: ${id}`);
     return this.userService.update(id, updateUserDto);
   }
 
@@ -121,6 +136,7 @@ export class UserController {
     description: 'User not found' 
   })
   async remove(@Param('id') id: string): Promise<IUser> {
+    this.logger.log(`Removing user with ID: ${id}`);
     return this.userService.remove(id);
   }
 }
