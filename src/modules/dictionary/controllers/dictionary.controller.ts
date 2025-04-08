@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Logger, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Logger, Param, Post, NotFoundException } from '@nestjs/common';
 import { DictionaryService } from '../services/dictionary.service';
 import { Prisma, Sign as PrismaSign} from '@prisma/client';
 import { ApiBody, ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -17,9 +17,17 @@ export class DictionaryController {
   @ApiBody({ type: CreateSignDto })
   @ApiCreatedResponse({ description: 'The sign has been successfully created.', type: Sign })
   async createSign(@Body() sign: Prisma.SignCreateInput): Promise<PrismaSign> {
-    this.logger.verbose(`Creating sign...`);
-    this.logger.debug(`Sign: ${JSON.stringify(sign)}`);
-    return await this.dictionaryService.createSign(sign);
+    this.logger.log(`Creating sign with word: ${sign.word}`);
+    this.logger.debug(`Sign data: ${JSON.stringify(sign)}`);
+    
+    try {
+      const result = await this.dictionaryService.createSign(sign);
+      this.logger.log(`Sign created successfully with ID: ${result.id}`);
+      return result;
+    } catch (error) {
+      this.logger.error(`Failed to create sign: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 
   @Get()
@@ -27,7 +35,16 @@ export class DictionaryController {
   @ApiOkResponse({ description: 'All signs have been successfully retrieved.', type: [Sign] })
   @ApiNoContentResponse({ description: 'No signs found.' })
   async getSigns(): Promise<PrismaSign[]> {
-    return await this.dictionaryService.getAllSigns();
+    this.logger.log('Get all signs request received');
+    
+    try {
+      const signs = await this.dictionaryService.getAllSigns();
+      this.logger.log(`Retrieved ${signs.length} signs successfully`);
+      return signs;
+    } catch (error) {
+      this.logger.error(`Failed to retrieve signs: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 
   @Get('search/:name')
@@ -35,13 +52,38 @@ export class DictionaryController {
   @ApiOkResponse({ description: 'The sign has been successfully found.', type: [Sign] })
   @ApiNoContentResponse({ description: 'No sign found with the given name.' })
   async searchSign(@Param('name') name: string): Promise<PrismaSign[]> {
-    return await this.dictionaryService.searchSign(name);
+    this.logger.log(`Search sign request received for name: "${name}"`);
+    
+    try {
+      const signs = await this.dictionaryService.searchSign(name);
+      this.logger.log(`Found ${signs.length} signs matching "${name}"`);
+      return signs;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        this.logger.warn(`No signs found matching: "${name}"`);
+      } else {
+        this.logger.error(`Error searching for signs: ${error.message}`, error.stack);
+      }
+      throw error;
+    }
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a sign by ID' }) 
   @ApiOkResponse({ description: 'The sign has been successfully deleted.' })
   async deleteSign(@Param('id') id: string): Promise<void> {
-    await this.dictionaryService.deleteSign(id);
+    this.logger.log(`Delete sign request received for ID: ${id}`);
+    
+    try {
+      await this.dictionaryService.deleteSign(id);
+      this.logger.log(`Sign with ID ${id} successfully deleted`);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        this.logger.warn(`Attempted to delete non-existent sign with ID: ${id}`);
+      } else {
+        this.logger.error(`Error deleting sign with ID ${id}: ${error.message}`, error.stack);
+      }
+      throw error;
+    }
   }
 }
