@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,66 +8,56 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  username  String   @unique
-  email     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-  
-  // Profile data fields
-  firstName String?
-  lastName  String?
-  avatarUrl String?
-  
-  // Relations
+  id          String       @id @default(cuid())
+  email       String       @unique
+  username    String       @unique
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @default(now()) @updatedAt
+  avatarUrl   String?
+  firstName   String?
+  lastName    String?
   authMethods AuthMethod[]
-}
-
-enum AuthMethodType {
-  LOCAL
-  GOOGLE
-  // Add other providers as needed
 }
 
 model AuthMethod {
   id             String         @id @default(cuid())
   userId         String
   type           AuthMethodType
-  identifier     String         // Could be email for LOCAL, provider's user ID for OAuth
-  credential     String?        // Hashed password for LOCAL, access token for OAuth
-  refreshToken   String?        // For OAuth
+  identifier     String
+  credential     String?
+  refreshToken   String?
   isVerified     Boolean        @default(false)
   lastUsedAt     DateTime?
   failedAttempts Int            @default(0)
   lockedUntil    DateTime?
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @default(now()) @updatedAt
-  
-  // Relations
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tokens Token[]
-  
-  // Unique constraint to ensure one type per userId-identifier combination
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokens         Token[]
+
   @@unique([userId, type, identifier])
 }
 
 model Token {
-  id           String    @id @default(cuid())
-  authMethodId String
-  token        String    @unique
+  id           String     @id @default(cuid())
+  token        String     @unique
+  createdAt    DateTime   @default(now())
   expiresAt    DateTime
-  createdAt    DateTime  @default(now())
-  revoked      Boolean   @default(false)
-  
-  // Relations
-  authMethod AuthMethod @relation(fields: [authMethodId], references: [id], onDelete: Cascade)
+  revoked      Boolean    @default(false)
+  authMethodId String
+  authMethod   AuthMethod @relation(fields: [authMethodId], references: [id], onDelete: Cascade)
 }
 
 model Sign {
-  id          String   @id @default(cuid())
-  word        String
-  definition  String? // Null if no definition
-  mediaUrl    String? // URL to image or video
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt
+  id         String   @id @default(cuid())
+  word       String
+  definition String?
+  mediaUrl   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+}
+
+enum AuthMethodType {
+  LOCAL
+  GOOGLE
 }
