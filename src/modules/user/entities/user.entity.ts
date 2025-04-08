@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IUser } from '../interfaces/user.interface';
+import { IUser, UserRole } from '../interfaces/user.interface';
 
 /**
  * User entity for Swagger documentation that mirrors the IUser interface
@@ -59,4 +59,12 @@ export class User implements IUser {
     nullable: true 
   })
   avatarUrl?: string | null;
+  
+  @ApiProperty({ 
+    description: 'User role', 
+    example: 'USER',
+    enum: UserRole,
+    default: UserRole.USER
+  })
+  role: UserRole;
 }

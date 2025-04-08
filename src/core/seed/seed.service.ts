@@ -47,6 +47,7 @@ export class SeedService implements OnModuleInit {
           username: adminUsername,
           firstName: 'Admin',
           lastName: 'User',
+          role: 'ADMIN', // Set the role to ADMIN
         },
       });
 

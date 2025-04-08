@@ -1,4 +1,13 @@
 /**
+ * User role enum matching Prisma schema
+ */
+export enum UserRole {
+  USER = 'USER',
+  ADMIN = 'ADMIN',
+  MODERATOR = 'MODERATOR'
+}
+
+/**
  * Core User interface that matches the User model from Prisma schema
  * Used throughout the application for user management
  */
@@ -11,6 +20,7 @@ export interface IUser {
   firstName?: string | null;
   lastName?: string | null;
   avatarUrl?: string | null;
+  role: UserRole;
 }
 
 /**
@@ -34,6 +44,7 @@ export interface ICreateUserData {
   firstName?: string;
   lastName?: string;
   avatarUrl?: string;
+  role?: UserRole;
 }
 
 /**
@@ -45,6 +56,7 @@ export interface IUpdateUserData {
   firstName?: string | null;
   lastName?: string | null;
   avatarUrl?: string | null;
+  role?: UserRole;
 }
 
 /**

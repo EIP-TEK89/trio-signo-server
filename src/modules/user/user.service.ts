@@ -45,6 +45,7 @@ export class UserService {
           avatarUrl: true,
           createdAt: true,
           updatedAt: true,
+          role: true,
         }
       });
 
@@ -114,6 +115,7 @@ export class UserService {
             avatarUrl: true,
             createdAt: true,
             updatedAt: true,
+            role: true,
           }
         }),
         this.prisma.user.count({ where })
@@ -155,6 +157,7 @@ export class UserService {
           avatarUrl: true,
           createdAt: true,
           updatedAt: true,
+          role: true,
         }
       });
 
@@ -192,6 +195,7 @@ export class UserService {
           avatarUrl: true,
           createdAt: true,
           updatedAt: true,
+          role: true,
         }
       });
       
@@ -226,6 +230,7 @@ export class UserService {
           avatarUrl: true,
           createdAt: true,
           updatedAt: true,
+          role: true,
         }
       });
       
@@ -282,6 +287,7 @@ export class UserService {
           avatarUrl: true,
           createdAt: true,
           updatedAt: true,
+          role: true,
         }
       });
       
@@ -326,6 +332,7 @@ export class UserService {
           avatarUrl: true,
           createdAt: true,
           updatedAt: true,
+          role: true,
         }
       });
       

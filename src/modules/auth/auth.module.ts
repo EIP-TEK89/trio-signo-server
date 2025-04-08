@@ -10,6 +10,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RolesGuard } from './guards/roles.guard';
 import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
@@ -36,6 +37,10 @@ import { ScheduleModule } from '@nestjs/schedule';
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
   ],
   exports: [AuthService],

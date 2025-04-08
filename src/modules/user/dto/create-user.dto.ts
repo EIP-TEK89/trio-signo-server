@@ -1,6 +1,6 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ICreateUserData } from '../interfaces/user.interface';
+import { ICreateUserData, UserRole } from '../interfaces/user.interface';
 
 export class CreateUserDto implements ICreateUserData {
   @ApiProperty({
@@ -51,4 +51,14 @@ export class CreateUserDto implements ICreateUserData {
   @IsOptional()
   @IsString()
   avatarUrl?: string;
+
+  @ApiProperty({
+    description: 'User role',
+    enum: UserRole,
+    default: UserRole.USER,
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(UserRole)
+  role?: UserRole;
 }

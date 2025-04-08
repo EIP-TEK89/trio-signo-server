@@ -1,13 +1,14 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, HttpStatus, ParseIntPipe, DefaultValuePipe, Logger } from '@nestjs/common';
-import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UserService } from '../user.service';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
-import { User } from './entities/user.entity';
-import { PaginatedUsersEntity } from './entities/paginated-users.entity';
-import { IUser, PaginatedUsers, IUserQueryOptions } from './interfaces/user.interface';
+import { User } from '../entities/user.entity';
+import { PaginatedUsersEntity } from '../entities/paginated-users.entity';
+import { IUser, PaginatedUsers, IUserQueryOptions, UserRole } from '../interfaces/user.interface';
+import { Roles } from '../../auth/decorators/roles.decorator';
 
-@ApiTags('Users')
+@ApiTags('Users Admin')
 @ApiBearerAuth('JWT-auth')
 @Controller('users')
 export class UserController {
@@ -16,7 +17,8 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create a new user' })
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Create a new user (Admin only)' })
   @ApiResponse({ 
     status: HttpStatus.CREATED, 
     description: 'The user has been successfully created.',
@@ -30,13 +32,18 @@ export class UserController {
     status: HttpStatus.CONFLICT, 
     description: 'User with that username or email already exists.' 
   })
+  @ApiResponse({ 
+    status: HttpStatus.FORBIDDEN, 
+    description: 'Insufficient permissions. Admin role required.' 
+  })
   async create(@Body() createUserDto: CreateUserDto): Promise<IUser> {
     this.logger.log(`Creating new user with username: ${createUserDto.username}`);
     return this.userService.create(createUserDto);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all users with pagination' })
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Get all users with pagination (Admin only)' })
   @ApiQuery({ name: 'skip', required: false, description: 'Number of records to skip', type: Number })
   @ApiQuery({ name: 'take', required: false, description: 'Number of records to take', type: Number })
   @ApiQuery({ name: 'orderBy', required: false, description: 'Field to order by (e.g. "username:asc")', type: String })
@@ -45,6 +52,10 @@ export class UserController {
     status: HttpStatus.OK, 
     description: 'Return paginated list of users',
     type: PaginatedUsersEntity
+  })
+  @ApiResponse({ 
+    status: HttpStatus.FORBIDDEN, 
+    description: 'Insufficient permissions. Admin role required.' 
   })
   async findAll(
     @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number,
@@ -84,7 +95,8 @@ export class UserController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get a user by id' })
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Get a user by id (Admin only)' })
   @ApiParam({ name: 'id', description: 'User ID' })
   @ApiResponse({ 
     status: HttpStatus.OK, 
@@ -95,13 +107,18 @@ export class UserController {
     status: HttpStatus.NOT_FOUND, 
     description: 'User not found' 
   })
+  @ApiResponse({ 
+    status: HttpStatus.FORBIDDEN, 
+    description: 'Insufficient permissions. Admin role required.' 
+  })
   async findOne(@Param('id') id: string): Promise<IUser> {
     this.logger.log(`Finding user by ID: ${id}`);
     return this.userService.findOne(id);
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update a user' })
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Update a user (Admin only)' })
   @ApiParam({ name: 'id', description: 'User ID' })
   @ApiResponse({ 
     status: HttpStatus.OK, 
@@ -120,13 +137,18 @@ export class UserController {
     status: HttpStatus.CONFLICT, 
     description: 'User with that username or email already exists.' 
   })
+  @ApiResponse({ 
+    status: HttpStatus.FORBIDDEN, 
+    description: 'Insufficient permissions. Admin role required.' 
+  })
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto): Promise<IUser> {
     this.logger.log(`Updating user with ID: ${id}`);
     return this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete a user' })
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Delete a user (Admin only)' })
   @ApiParam({ name: 'id', description: 'User ID' })
   @ApiResponse({ 
     status: HttpStatus.OK, 
@@ -135,6 +157,10 @@ export class UserController {
   @ApiResponse({ 
     status: HttpStatus.NOT_FOUND, 
     description: 'User not found' 
+  })
+  @ApiResponse({ 
+    status: HttpStatus.FORBIDDEN, 
+    description: 'Insufficient permissions. Admin role required.' 
   })
   async remove(@Param('id') id: string): Promise<IUser> {
     this.logger.log(`Removing user with ID: ${id}`);

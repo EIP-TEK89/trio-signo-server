@@ -1,13 +1,14 @@
 import { Body, Controller, Delete, Get, Logger, Param, Post, NotFoundException } from '@nestjs/common';
 import { DictionaryService } from './services/dictionary.service';
 import { Prisma, Sign as PrismaSign} from '@prisma/client';
-import { ApiBody, ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { CreateSignDto } from './dtos/create-sign.dto';
 import { Sign } from './sign.entity';
 import { Public } from '../auth/decorators/public.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '../user/interfaces/user.interface';
 
 @ApiTags('Dictionary')
-@Public()
 @Controller('signs')
 export class DictionaryController {
   private readonly logger = new Logger(DictionaryController.name);
@@ -15,9 +16,19 @@ export class DictionaryController {
   constructor(private readonly dictionaryService: DictionaryService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create a new sign' })
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Create a new sign (Admin only)' })
   @ApiBody({ type: CreateSignDto })
   @ApiCreatedResponse({ description: 'The sign has been successfully created.', type: Sign })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Forbidden - Insufficient permissions. Admin role required.' 
+  })
   async createSign(@Body() sign: Prisma.SignCreateInput): Promise<PrismaSign> {
     this.logger.log(`Creating sign with word: ${sign.word}`);
     this.logger.debug(`Sign data: ${JSON.stringify(sign)}`);
@@ -33,6 +44,7 @@ export class DictionaryController {
   }
 
   @Get()
+  @Public()
   @ApiOperation({ summary: 'Get all signs' })
   @ApiOkResponse({ description: 'All signs have been successfully retrieved.', type: [Sign] })
   @ApiNoContentResponse({ description: 'No signs found.' })
@@ -50,6 +62,7 @@ export class DictionaryController {
   }
 
   @Get('search/:name')
+  @Public()
   @ApiOperation({ summary: 'Search for a sign by name' })
   @ApiOkResponse({ description: 'The sign has been successfully found.', type: [Sign] })
   @ApiNoContentResponse({ description: 'No sign found with the given name.' })
@@ -71,8 +84,18 @@ export class DictionaryController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete a sign by ID' }) 
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Delete a sign by ID (Admin only)' }) 
   @ApiOkResponse({ description: 'The sign has been successfully deleted.' })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Forbidden - Insufficient permissions. Admin role required.' 
+  })
   async deleteSign(@Param('id') id: string): Promise<void> {
     this.logger.log(`Delete sign request received for ID: ${id}`);
     
