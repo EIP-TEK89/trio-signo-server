@@ -7,7 +7,7 @@ import { User } from './entities/user.entity';
 import { PaginatedUsersEntity } from './entities/paginated-users.entity';
 import { IUser, PaginatedUsers, IUserQueryOptions } from './interfaces/user.interface';
 
-@ApiTags('users')
+@ApiTags('Users')
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
