@@ -15,34 +15,58 @@ datasource db {
 
 model User {
   id        String   @id @default(cuid())
-  email     String   @unique
   username  String   @unique
-  password  String? // Null if OAuth
+  email     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
-
-  tokens Token[] // Foreign key
+  
+  // Profile data fields
+  firstName String?
+  lastName  String?
+  avatarUrl String?
+  
+  // Relations
+  authMethods AuthMethod[]
 }
 
-enum TokenType {
-  JWT
-  OAUTH
+enum AuthMethodType {
+  LOCAL
+  GOOGLE
+  // Add other providers as needed
+}
+
+model AuthMethod {
+  id             String         @id @default(cuid())
+  userId         String
+  type           AuthMethodType
+  identifier     String         // Could be email for LOCAL, provider's user ID for OAuth
+  credential     String?        // Hashed password for LOCAL, access token for OAuth
+  refreshToken   String?        // For OAuth
+  isVerified     Boolean        @default(false)
+  lastUsedAt     DateTime?
+  failedAttempts Int            @default(0)
+  lockedUntil    DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @default(now()) @updatedAt
+  
+  // Relations
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokens Token[]
+  
+  // Unique constraint to ensure one type per userId-identifier combination
+  @@unique([userId, type, identifier])
 }
 
 model Token {
   id           String    @id @default(cuid())
-  userId       String // Foreign key
-  token        String
-  refreshToken String?
-  provider     String? // Google, Facebook, etc. if OAuth
-  type         TokenType // JWT, OAUTH
-  createdAt    DateTime  @default(now())
+  authMethodId String
+  token        String    @unique
   expiresAt    DateTime
+  createdAt    DateTime  @default(now())
   revoked      Boolean   @default(false)
-
-  user User @relation(fields: [userId], references: [id]) // Foreign key
-
-  scope String? // For OAuth
+  
+  // Relations
+  authMethod AuthMethod @relation(fields: [authMethodId], references: [id], onDelete: Cascade)
 }
 
 model Sign {
