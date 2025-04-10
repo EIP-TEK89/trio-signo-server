@@ -20,6 +20,7 @@ model User {
   authMethods    AuthMethod[]
   Lesson         Lesson[]
   LessonProgress LessonProgress[]
+  SignProgress   SignProgress[]
 }
 
 model AuthMethod {
@@ -51,17 +52,6 @@ model Token {
   authMethod   AuthMethod @relation(fields: [authMethodId], references: [id], onDelete: Cascade)
 }
 
-model Sign {
-  id         String   @id @default(cuid())
-  word       String
-  definition String?
-  mediaUrl   String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now()) @updatedAt
-
-  exercises Exercise[]
-}
-
 enum AuthMethodType {
   LOCAL
   GOOGLE
@@ -71,6 +61,41 @@ enum UserRole {
   USER
   ADMIN
   MODERATOR
+}
+
+// Sign model
+model SignCategory {
+  id    String @id @default(cuid())
+  name  String @unique
+  signs Sign[]
+}
+
+model Sign {
+  id         String   @id @default(cuid())
+  word       String
+  definition String?
+  mediaUrl   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  categoryId   String?
+  category     SignCategory?  @relation(fields: [categoryId], references: [id])
+  exercises    Exercise[]
+  SignProgress SignProgress[]
+}
+
+model SignProgress {
+  id           String   @id @default(cuid())
+  userId       String
+  signId       String
+  seenCount    Int      @default(0)
+  successCount Int      @default(0)
+  lastSeen     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  sign Sign @relation(fields: [signId], references: [id])
+
+  @@unique([userId, signId])
 }
 
 // Lesson model
