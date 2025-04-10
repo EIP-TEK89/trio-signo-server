@@ -78,7 +78,7 @@ model Sign {
 
   categoryId String?
   category   SignCategory? @relation(fields: [categoryId], references: [id])
-  exercise   Exercise[]
+  exercises  Exercise[]
 }
 
 // Lesson model
