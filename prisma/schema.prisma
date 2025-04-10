@@ -101,17 +101,6 @@ model Lesson {
   exercises Exercise[]
 }
 
-model Exercise {
-  id       String  @id @default(cuid())
-  lessonId String
-  prompt   String // text or instruction of the exercise
-  signId   String? // sign expected or targeted by the exercise
-
-  // relations
-  lesson Lesson @relation(fields: [lessonId], references: [id])
-  sign   Sign?  @relation(fields: [signId], references: [id])
-}
-
 model LessonProgress {
   id          String   @id @default(cuid())
   userId      String
@@ -124,4 +113,23 @@ model LessonProgress {
   user User @relation(fields: [userId], references: [id])
 
   @@unique([userId, lessonId])
+}
+
+// Exercise model
+enum ExerciseType {
+  WORD_TO_IMAGE
+  IMAGE_TO_WORD
+  SIGN_RECOGNITION
+}
+
+model Exercise {
+  id       String       @id @default(cuid())
+  lessonId String
+  prompt   String // text or instruction of the exercise
+  signId   String? // sign expected or targeted by the exercise
+  type     ExerciseType
+
+  // relations
+  lesson Lesson @relation(fields: [lessonId], references: [id])
+  sign   Sign?  @relation(fields: [signId], references: [id])
 }
