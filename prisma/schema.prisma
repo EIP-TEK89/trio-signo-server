@@ -108,9 +108,8 @@ model Exercise {
   signId   String? // sign expected or targeted by the exercise
 
   // relations
-  lesson         Lesson  @relation(fields: [lessonId], references: [id])
-  signProgressId String?
-  sign           Sign?   @relation(fields: [signId], references: [id])
+  lesson Lesson @relation(fields: [lessonId], references: [id])
+  sign   Sign?  @relation(fields: [signId], references: [id])
 }
 
 model LessonProgress {
