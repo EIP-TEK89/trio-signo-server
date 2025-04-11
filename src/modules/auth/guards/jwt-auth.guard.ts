@@ -33,7 +33,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context);
   }
 
-  handleRequest(err, user, info) {
+  handleRequest(err, user) {
     if (err) {
       this.logger.warn(`JWT authentication error: ${err.message}`);
       throw err;
