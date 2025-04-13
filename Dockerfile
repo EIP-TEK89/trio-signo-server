@@ -1,5 +1,5 @@
 # Base image
-FROM node:23-slim
+FROM node:23-bullseye-slim
 
 # Create app directory
 WORKDIR /usr/src/app
