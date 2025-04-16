@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, Inject, Logger } from '@nestjs/common';
 import { IStorageService } from '../../../services/storage/storage.interface';
 import { PrismaService } from 'prisma/prisma.service';
-import { Prisma, Sign } from '@prisma/client';
+import { Sign } from '@prisma/client';
 import { CreateSignDto } from '../dtos/create-sign.dto';
 
 @Injectable()

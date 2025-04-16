@@ -8,16 +8,17 @@ datasource db {
 }
 
 model User {
-  id          String       @id @default(cuid())
-  email       String       @unique
-  username    String       @unique
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @default(now()) @updatedAt
-  avatarUrl   String?
-  firstName   String?
-  lastName    String?
-  role        UserRole     @default(USER)
-  authMethods AuthMethod[]
+  id             String           @id @default(cuid())
+  email          String           @unique
+  username       String           @unique
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @default(now()) @updatedAt
+  avatarUrl      String?
+  firstName      String?
+  lastName       String?
+  role           UserRole         @default(USER)
+  authMethods    AuthMethod[]
+  LessonProgress LessonProgress[]
 }
 
 model AuthMethod {
@@ -49,15 +50,6 @@ model Token {
   authMethod   AuthMethod @relation(fields: [authMethodId], references: [id], onDelete: Cascade)
 }
 
-model Sign {
-  id         String   @id @default(cuid())
-  word       String
-  definition String?
-  mediaUrl   String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now()) @updatedAt
-}
-
 enum AuthMethodType {
   LOCAL
   GOOGLE
@@ -67,4 +59,77 @@ enum UserRole {
   USER
   ADMIN
   MODERATOR
+}
+
+// Sign model
+model SignCategory {
+  id    String @id @default(cuid())
+  name  String @unique
+  signs Sign[]
+}
+
+model Sign {
+  id         String   @id @default(cuid())
+  word       String
+  definition String?
+  mediaUrl   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  categoryId String?
+  category   SignCategory? @relation(fields: [categoryId], references: [id])
+  exercises  Exercise[]
+}
+
+// Lesson model
+enum LessonLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+model Lesson {
+  id          String      @id @default(cuid())
+  title       String
+  description String?
+  level       LessonLevel @default(BEGINNER)
+  isPublished Boolean     @default(false) // used to test the lesson before publishing it
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @default(now()) @updatedAt
+
+  // relations
+  exercises Exercise[]
+}
+
+model LessonProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  lessonId    String
+  completed   Boolean  @default(false)
+  currentStep Int      @default(0) // number of the current step
+  score       Int? // total score (optionnal)
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, lessonId])
+}
+
+// Exercise model
+enum ExerciseType {
+  WORD_TO_IMAGE
+  IMAGE_TO_WORD
+  SIGN_RECOGNITION
+}
+
+model Exercise {
+  id       String       @id @default(cuid())
+  lessonId String
+  prompt   String // text or instruction of the exercise
+  signId   String? // sign expected or targeted by the exercise
+  type     ExerciseType
+
+  // relations
+  lesson Lesson @relation(fields: [lessonId], references: [id])
+  sign   Sign?  @relation(fields: [signId], references: [id])
 }
