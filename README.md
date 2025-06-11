@@ -1,3 +1,7 @@
+<p align="center">
+ <img src="assets/logo-crop.png" alt="Trio Signo Logo" width="300">
+</p>
+
 <h1 align="center">Trio Signo Backend</h1>
 
 <p align="center">
