@@ -43,22 +43,24 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Register a new user' })
   @ApiBody({ type: RegisterDto })
-  @ApiResponse({ 
-    status: HttpStatus.CREATED, 
-    description: 'User registered successfully' 
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'User registered successfully',
   })
-  @ApiResponse({ 
-    status: HttpStatus.CONFLICT, 
-    description: 'User with this email or username already exists' 
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'User with this email or username already exists',
   })
-  @ApiResponse({ 
-    status: HttpStatus.BAD_REQUEST, 
-    description: 'Invalid input data' 
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid input data',
   })
   async register(@Body() registerDto: RegisterDto) {
-    this.logger.log(`Registration attempt for email: ${registerDto.email}`); 
+    this.logger.log(`Registration attempt for email: ${registerDto.email}`);
     const result = await this.authService.register(registerDto);
-    this.logger.log(`Registration successful for user: ${result.user.username}`);
+    this.logger.log(
+      `Registration successful for user: ${result.user.username}`,
+    );
     return result;
   }
 
@@ -67,13 +69,13 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login with email and password' })
   @ApiBody({ type: LoginDto })
-  @ApiResponse({ 
-    status: HttpStatus.OK, 
-    description: 'Login successful' 
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Login successful',
   })
-  @ApiResponse({ 
-    status: HttpStatus.UNAUTHORIZED, 
-    description: 'Invalid credentials' 
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid credentials',
   })
   async login(@Body() loginDto: LoginDto) {
     this.logger.log(`Login attempt for email: ${loginDto.email}`);
@@ -87,18 +89,22 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiBody({ type: RefreshTokenDto })
-  @ApiResponse({ 
-    status: HttpStatus.OK, 
-    description: 'Token refreshed successfully' 
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Token refreshed successfully',
   })
-  @ApiResponse({ 
-    status: HttpStatus.UNAUTHORIZED, 
-    description: 'Invalid refresh token' 
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid refresh token',
   })
   async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     this.logger.log('Token refresh attempt');
-    const result = await this.authService.refreshToken(refreshTokenDto.refreshToken);
-    this.logger.log(`Token refresh successful for user: ${result.user.username}`);
+    const result = await this.authService.refreshToken(
+      refreshTokenDto.refreshToken,
+    );
+    this.logger.log(
+      `Token refresh successful for user: ${result.user.username}`,
+    );
     return result;
   }
 
@@ -107,13 +113,13 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Logout user' })
-  @ApiResponse({ 
-    status: HttpStatus.OK, 
-    description: 'Logout successful' 
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Logout successful',
   })
-  @ApiResponse({ 
-    status: HttpStatus.UNAUTHORIZED, 
-    description: 'Unauthorized' 
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized',
   })
   async logout(@Req() req) {
     this.logger.log(`Logout attempt for user ID: ${req.user.userId}`);
@@ -127,9 +133,9 @@ export class AuthController {
   @Get('google')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Login with Google' })
-  @ApiResponse({ 
-    status: HttpStatus.FOUND, 
-    description: 'Redirect to Google login page' 
+  @ApiResponse({
+    status: HttpStatus.FOUND,
+    description: 'Redirect to Google login page',
   })
   googleAuth() {
     this.logger.log('Initiating Google OAuth authentication flow');
@@ -140,13 +146,13 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Google OAuth callback' })
-  @ApiResponse({ 
-    status: HttpStatus.FOUND, 
-    description: 'Redirect to frontend with token' 
+  @ApiResponse({
+    status: HttpStatus.FOUND,
+    description: 'Redirect to frontend with token',
   })
-  @ApiResponse({ 
-    status: HttpStatus.UNAUTHORIZED, 
-    description: 'Authentication failed' 
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Authentication failed',
   })
   googleAuthCallback(@Req() req, @Res() res: Response) {
     this.logger.log('Processing Google OAuth callback');
@@ -157,14 +163,21 @@ export class AuthController {
         throw new UnauthorizedException('Authentication failed');
       }
 
-      this.logger.log(`Google OAuth authentication successful for user: ${user.username}`);
-      
+      this.logger.log(
+        `Google OAuth authentication successful for user: ${user.username}`,
+      );
+
       // Redirect to frontend with token
-      const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
-      this.logger.debug(`Redirecting to: ${frontendUrl}/login?token=****`);
-      res.redirect(`${frontendUrl}/login?token=${token}`);
+      const frontendUrl =
+        this.configService.get<string>('FRONTEND_URL') ||
+        'http://localhost:3000';
+      this.logger.debug(`Redirecting to: ${frontendUrl}/signin?token=****`);
+      res.redirect(`${frontendUrl}/signin?token=${token}`);
     } catch (error) {
-      this.logger.error(`Google OAuth callback error: ${error.message}`, error.stack);
+      this.logger.error(
+        `Google OAuth callback error: ${error.message}`,
+        error.stack,
+      );
       res.redirect('/auth/login?error=Authentication%20failed');
     }
   }
@@ -173,13 +186,13 @@ export class AuthController {
   @Get('me')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get current user profile' })
-  @ApiResponse({ 
-    status: HttpStatus.OK, 
-    description: 'User profile retrieved successfully' 
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'User profile retrieved successfully',
   })
-  @ApiResponse({ 
-    status: HttpStatus.UNAUTHORIZED, 
-    description: 'Unauthorized' 
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized',
   })
   async getCurrentUser(@Req() req) {
     this.logger.debug(`Getting profile for user ID: ${req.user.userId}`);
