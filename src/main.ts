@@ -8,6 +8,9 @@ dotenv.config();
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Configurer un préfixe global pour toutes les routes
+  app.setGlobalPrefix('api');
+
   const config = new DocumentBuilder()
     .setTitle('API Documentation')
     .setDescription('TrioSigno API Documentation')
