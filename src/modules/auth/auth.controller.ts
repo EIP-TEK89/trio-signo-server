@@ -145,7 +145,7 @@ export class AuthController {
   @Public()
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
-  @ApiOperation({ summary: 'Google OAuth callback' })
+  @ApiOperation({ summary: 'Handle Google OAuth redirect' })
   @ApiResponse({
     status: HttpStatus.FOUND,
     description: 'Redirect to frontend with token',
