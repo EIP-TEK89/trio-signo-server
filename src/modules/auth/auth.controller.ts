@@ -143,7 +143,7 @@ export class AuthController {
   }
 
   @Public()
-  @Get('google/callback')
+  @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Google OAuth callback' })
   @ApiResponse({
@@ -170,7 +170,7 @@ export class AuthController {
       // Redirect to frontend with token
       const frontendUrl =
         this.configService.get<string>('FRONTEND_URL') ||
-        'http://localhost:3000';
+        'http://localhost:4000';
       this.logger.debug(`Redirecting to: ${frontendUrl}/signin?token=****`);
       res.redirect(`${frontendUrl}/signin?token=${token}`);
     } catch (error) {
