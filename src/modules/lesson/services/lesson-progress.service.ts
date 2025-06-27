@@ -156,12 +156,16 @@ export class LessonProgressService {
       throw new ConflictException('Lesson already completed. Cannot update progress.');
     }
 
-    // Create an update object without the score field
-    const updateData = {
+    // Create an update object with all fields
+    const updateData: any = {
       currentStep: updateDto.currentStep,
       completed: updateDto.completed,
-      // Score is not included as it's managed by the backend based on exercise performance
     };
+    
+    // Include score if provided
+    if (updateDto.score !== undefined) {
+      updateData.score = updateDto.score;
+    }
 
     // Update progress
     return this.prisma.lessonProgress.update({

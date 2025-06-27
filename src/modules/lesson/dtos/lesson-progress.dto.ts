@@ -29,7 +29,14 @@ export class UpdateLessonProgressDto {
   @IsBoolean()
   completed?: boolean;
 
-  // Score is no longer accepted from the frontend as it's calculated by the backend
+  @ApiProperty({
+    example: 85,
+    description: 'Score for the lesson (0-100)',
+    required: false
+  })
+  @IsOptional()
+  @IsInt()
+  score?: number;
 }
 
 export class CompleteLessonDto {
