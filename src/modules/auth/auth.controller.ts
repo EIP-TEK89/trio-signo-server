@@ -172,7 +172,7 @@ export class AuthController {
         this.configService.get<string>('FRONTEND_URL') ||
         'http://localhost:4000';
       this.logger.debug(`Redirecting to: ${frontendUrl}/signin?token=****`);
-      res.redirect(`${frontendUrl}/signin?token=${token}`);
+      res.redirect(`${frontendUrl}/login?token=${token}`);
     } catch (error) {
       this.logger.error(
         `Google OAuth callback error: ${error.message}`,
