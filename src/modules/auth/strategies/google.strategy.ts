@@ -34,9 +34,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     
     this.logger.debug(`Google profile email: ${emails[0].value}`);
     
+    // Create a more readable username from Google profile
+    const username = `${name.givenName.toLowerCase()}_${name.familyName.toLowerCase()}`;
+    
     const oauthUser: IOAuthUser = {
       email: emails[0].value,
-      username: `${name.givenName}${name.familyName}`.toLowerCase(),
+      username: username,
       firstName: name.givenName,
       lastName: name.familyName,
       avatarUrl: photos[0]?.value,
