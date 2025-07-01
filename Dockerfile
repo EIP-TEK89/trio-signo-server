@@ -13,6 +13,9 @@ RUN npm install
 # Bundle app source
 COPY . .
 
+# Create assets directory if it doesn't exist
+RUN mkdir -p assets
+
 # Generate prisma client
 RUN npx prisma generate
 
