@@ -8,11 +8,13 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { FilesService } from './files.service';
+import { Public } from '../../modules/auth/decorators/public.decorator';
 
 @Controller('files')
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
+  @Public()
   @Get('download/:filename')
   async downloadFile(
     @Param('filename') filename: string,
