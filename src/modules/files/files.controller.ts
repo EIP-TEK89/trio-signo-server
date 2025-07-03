@@ -37,4 +37,33 @@ export class FilesController {
       );
     }
   }
+
+  @Public()
+  @Get('models/:modelName')
+  async downloadSignRecognizerModel(
+    @Param('modelName') modelName: string,
+    @Res() res: Response,
+  ) {
+    try {
+      const modelPath = this.filesService.getSignRecognizerModelPath(modelName);
+      // Utiliser res.download pour envoyer le fichier comme pièce jointe
+      return res.download(
+        modelPath,
+        `${modelName.endsWith('.zip') ? modelName : modelName + '.zip'}`,
+        (err) => {
+          if (err) {
+            throw new HttpException(
+              'Error occurred while downloading the model',
+              HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+          }
+        },
+      );
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Model not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+  }
 }
