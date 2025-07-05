@@ -342,49 +342,56 @@ export class UserService {
   /**
    * Delete a user and all associated data
    * This method manually deletes related records first to avoid foreign key constraint errors
-   * Requires password verification for security
+   * Requires password verification for security if password is provided
+   * Admin can bypass password verification for admin operations
    */
-  async remove(id: string, password: string): Promise<IUser> {
+  async remove(id: string, password?: string): Promise<IUser> {
     this.logger.log(`Removing user with ID: ${id}`);
 
     try {
       // First verify the user exists
       const user = await this.findOne(id);
 
-      // Verify password before proceeding with deletion
-      // Get the LOCAL auth method for this user
-      const authMethod = await this.prisma.authMethod.findFirst({
-        where: {
-          userId: id,
-          type: AuthMethodType.LOCAL,
-        },
-      });
+      // If password is provided, verify it before proceeding with deletion
+      if (password) {
+        // Get the LOCAL auth method for this user
+        const authMethod = await this.prisma.authMethod.findFirst({
+          where: {
+            userId: id,
+            type: AuthMethodType.LOCAL,
+          },
+        });
 
-      if (!authMethod) {
-        this.logger.warn(`No LOCAL auth method found for user ${id}`);
-        throw new BadRequestException(
-          'Cannot delete account: no local authentication method found',
+        if (!authMethod) {
+          this.logger.warn(`No LOCAL auth method found for user ${id}`);
+          throw new BadRequestException(
+            'Cannot delete account: no local authentication method found',
+          );
+        }
+
+        // Verify the password
+        const isPasswordValid = await comparePasswords(
+          password,
+          authMethod.credential,
+        );
+
+        if (!isPasswordValid) {
+          this.logger.warn(
+            `Invalid password provided for account deletion: user ${id}`,
+          );
+          throw new UnauthorizedException(
+            'Password is incorrect. Account deletion aborted.',
+          );
+        }
+
+        this.logger.debug(
+          `Password verified for user ${id}, proceeding with deletion`,
+        );
+      } else {
+        this.logger.debug(
+          `Password verification bypassed for user ${id} (admin operation)`,
         );
       }
-
-      // Verify the password
-      const isPasswordValid = await comparePasswords(
-        password,
-        authMethod.credential,
-      );
-
-      if (!isPasswordValid) {
-        this.logger.warn(
-          `Invalid password provided for account deletion: user ${id}`,
-        );
-        throw new UnauthorizedException(
-          'Password is incorrect. Account deletion aborted.',
-        );
-      }
-
-      this.logger.debug(
-        `Password verified for user ${id}, proceeding with deletion`,
-      );
 
       // Begin a transaction to ensure all operations succeed or fail together
       return await this.prisma.$transaction(async (prisma) => {
